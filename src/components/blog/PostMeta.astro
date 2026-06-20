@@ -1,0 +1,26 @@
+---
+/**
+ * PostMeta — the metadata row under a post title:
+ * published date, optional "updated" date, reading time, optional difficulty.
+ *
+ * Props:
+ *   publishedAt, updatedAt?, readingTime (minutes), difficulty?
+ */
+interface Props {
+  publishedAt: Date;
+  updatedAt?: Date;
+  readingTime: number;
+  difficulty?: string;
+}
+const { publishedAt, updatedAt, readingTime, difficulty } = Astro.props;
+
+const fmt = (d: Date) =>
+  new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(d);
+---
+
+<div class="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[13px] text-[var(--text-muted)]">
+  <span>🗓 Published {fmt(publishedAt)}</span>
+  {updatedAt && <span>🔄 Updated {fmt(updatedAt)}</span>}
+  <span>⏱ {readingTime} min read</span>
+  {difficulty && <span>📈 {difficulty}</span>}
+</div>

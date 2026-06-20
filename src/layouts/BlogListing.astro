@@ -1,0 +1,78 @@
+---
+/**
+ * BlogListing — shared shell for /blog and /blog/category/<type>.
+ * Renders the heading, search box, filter tabs, post cards, and pagination.
+ * Both listing routes pass their pre-sliced page of posts to this layout, so
+ * the markup lives in exactly one place.
+ *
+ * Props:
+ *   title, subtitle: page heading text
+ *   posts:           the posts for THIS page (already sliced/paginated)
+ *   activeType?:     selected type slug (drives the filter tab + SEO)
+ *   currentPage, lastPage, baseUrl: pagination state (see Pagination.astro)
+ *   seoTitle?, seoDescription?: overrides for <head>
+ */
+import BaseLayout from './BaseLayout.astro';
+import Container from '../components/ui/Container.astro';
+import PostCard from '../components/blog/PostCard.astro';
+import FilterTabs from '../components/blog/FilterTabs.astro';
+import Pagination from '../components/blog/Pagination.astro';
+import SearchBox from '../components/blog/SearchBox.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  title: string;
+  subtitle: string;
+  posts: CollectionEntry<'blog'>[];
+  activeType?: string;
+  currentPage: number;
+  lastPage: number;
+  baseUrl: string;
+  seoTitle?: string;
+  seoDescription?: string;
+}
+const {
+  title,
+  subtitle,
+  posts,
+  activeType,
+  currentPage,
+  lastPage,
+  baseUrl,
+  seoTitle,
+  seoDescription,
+} = Astro.props;
+---
+
+<BaseLayout title={seoTitle ?? title} description={seoDescription ?? subtitle}>
+  <Container class="max-w-4xl">
+    <div class="pt-12">
+      <h1 class="text-3xl font-bold tracking-[-0.02em]">{title}</h1>
+      <p class="mt-1.5 text-[var(--text-muted)]">{subtitle}</p>
+
+      <div class="mt-6">
+        <SearchBox />
+      </div>
+
+      <div class="mt-5 mb-8">
+        <FilterTabs active={activeType} />
+      </div>
+    </div>
+
+    {
+      posts.length === 0 ? (
+        <div class="rounded-[14px] border border-dashed border-[var(--border)] bg-[var(--bg-subtle)] px-6 py-16 text-center">
+          <p class="text-sm text-[var(--text-muted)]">No posts here yet. Check back soon.</p>
+        </div>
+      ) : (
+        <div class="grid gap-4">
+          {posts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      )
+    }
+
+    <Pagination currentPage={currentPage} lastPage={lastPage} baseUrl={baseUrl} />
+  </Container>
+</BaseLayout>

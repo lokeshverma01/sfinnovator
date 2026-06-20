@@ -1,0 +1,44 @@
+---
+type: use-case
+title: 'Routing cases by region without writing code'
+description: 'An Omni-Channel and assignment-rules pattern for a real support team — and why we chose it over Apex.'
+publishedAt: 2026-06-03
+difficulty: Intermediate
+tags: [Service Cloud, Omni-Channel, Case Management]
+scenario: 'A support team handles cases across three regions (AMER, EMEA, APAC) and needs each case routed to the right regional queue automatically, with balanced agent workload.'
+businessValue: 'Faster first response, no manual triage, and agents only see cases they can actually action — improving CSAT and SLA attainment.'
+solution: 'Case Assignment Rules route by region to per-region queues; Omni-Channel then distributes from those queues to available agents by capacity — zero Apex, fully configurable by admins.'
+---
+
+## The situation
+
+The team was manually triaging every incoming case and assigning it by hand. This was
+slow, error-prone, and didn't balance load across agents.
+
+## Why not Apex?
+
+Apex routing would work, but it's harder to change, needs a developer for every tweak,
+and adds test-coverage overhead. The declarative stack handles this scenario cleanly and
+stays in the admin's hands.
+
+## The approach
+
+1. **Create three queues** — `Support AMER`, `Support EMEA`, `Support APAC` — each with
+   the relevant agents as members.
+2. **Case Assignment Rules** — one rule entry per region, matching on the case's
+   `Region` field:
+
+   ```
+   Case: Region equals AMER  →  assign to "Support AMER" queue
+   Case: Region equals EMEA  →  assign to "Support EMEA" queue
+   Case: Region equals APAC  →  assign to "Support APAC" queue
+   ```
+
+3. **Omni-Channel** — enable it, create a routing configuration with a capacity model,
+   and attach each queue so cases flow to the next available agent.
+
+## The result
+
+Cases now land in the right regional queue the instant they're created, and Omni-Channel
+balances them across agents by capacity. The whole flow is configurable by an admin with
+no code to maintain.

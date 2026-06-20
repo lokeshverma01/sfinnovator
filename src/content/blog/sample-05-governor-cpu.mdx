@@ -1,0 +1,23 @@
+---
+type: debugging
+title: 'Apex CPU time limit exceeded — finding the hotspot'
+description: 'A nightly batch hits the CPU limit. How to profile and trim it.'
+publishedAt: 2026-05-02
+difficulty: Advanced
+tags: [Apex, Governor Limits, Performance]
+status: workaround
+symptom: 'System.LimitException: Apex CPU time limit exceeded in a scheduled batch.'
+environment: 'Batch Apex over ~50k records with nested loops.'
+rootCause: 'Nested loops doing O(n^2) work plus repeated formula recalculation.'
+resolution: 'Pre-build maps for lookups and reduce scope size; a full redesign is tracked separately.'
+---
+
+## Profiling
+
+Add timestamps around suspected blocks and inspect the debug log CPU markers.
+
+```apex
+Long t0 = System.now().getTime();
+// suspect block
+System.debug('elapsed ' + (System.now().getTime() - t0));
+```

@@ -1,0 +1,29 @@
+---
+type: implementation
+title: 'Editable lightning-datatable with inline save'
+description: 'Wire up an editable datatable in LWC with draft values and a single save.'
+publishedAt: 2026-05-15
+difficulty: Advanced
+tags: [LWC, JavaScript, UI]
+objective: 'Render an editable datatable and persist inline edits with one Save action.'
+prerequisites:
+  - 'LWC dev basics'
+  - 'An Apex method to update records'
+outcome: 'A performant editable grid that bulk-saves draft values.'
+---
+
+## Markup
+
+```javascript
+import { LightningElement, wire } from 'lwc';
+export default class Grid extends LightningElement {
+  draftValues = [];
+  handleSave(event) {
+    /* persist event.detail.draftValues */
+  }
+}
+```
+
+## Notes
+
+Use draftValues to batch edits, then clear them after a successful save.

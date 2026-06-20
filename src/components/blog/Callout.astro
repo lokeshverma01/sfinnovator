@@ -1,0 +1,37 @@
+---
+/**
+ * Callout — a labeled box for a structured frontmatter field
+ * (Symptom, Root cause, Resolution, Objective, Prerequisites, Scenario, …).
+ * Colour/kind is class-based (.callout-*) for CSP safety.
+ *
+ * Renders either a `text` prop or slotted content (use the slot for lists).
+ *
+ * Props:
+ *   kind:  symptom | rootcause | resolution | outcome | prereq | objective
+ *          | scenario | value | neutral
+ *   label: the small uppercase label
+ *   icon:  optional emoji before the label
+ *   text:  optional string body (omit and use <slot/> for richer content)
+ */
+interface Props {
+  kind:
+    | 'symptom'
+    | 'rootcause'
+    | 'resolution'
+    | 'outcome'
+    | 'prereq'
+    | 'objective'
+    | 'scenario'
+    | 'value'
+    | 'neutral';
+  label: string;
+  icon?: string;
+  text?: string;
+}
+const { kind, label, icon, text } = Astro.props;
+---
+
+<div class:list={['callout', `callout-${kind}`]}>
+  <div class="callout-label">{icon && <span>{icon}</span>}{label}</div>
+  {text ? <p class="text-[14.5px]">{text}</p> : <slot />}
+</div>

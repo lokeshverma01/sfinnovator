@@ -1,0 +1,173 @@
+---
+/**
+ * BlogPost — the ONE consistent template every post renders through.
+ *
+ * Responsibilities:
+ *   - breadcrumb + type badge (+ status badge for debugging)
+ *   - title + metadata row (PostMeta)
+ *   - "top" structured callouts auto-rendered from the post's type fields
+ *   - the MDX body (<slot/>) styled via .prose
+ *   - "bottom" structured callout (Resolution / Outcome / Solution)
+ *   - tags + sticky Table of Contents
+ *   - full per-post SEO (Article type, OG) via BaseLayout
+ *
+ * It is driven entirely by frontmatter `data`, so authors never touch this file.
+ */
+import BaseLayout from './BaseLayout.astro';
+import Container from '../components/ui/Container.astro';
+import Badge from '../components/blog/Badge.astro';
+import Callout from '../components/blog/Callout.astro';
+import PostMeta from '../components/blog/PostMeta.astro';
+import TableOfContents from '../components/blog/TableOfContents.astro';
+import { postType, POST_STATUSES } from '../consts';
+import { readingTime } from '../lib/readingTime';
+import type { MarkdownHeading } from 'astro';
+import '../styles/prism.css';
+
+interface Props {
+  data: Record<string, any>;
+  headings: MarkdownHeading[];
+  body?: string;
+}
+const { data, headings, body } = Astro.props;
+
+const type = postType(data.type);
+const typeBadgeVariant =
+  data.type === 'implementation' ? 'impl' : data.type === 'use-case' ? 'usecase' : 'debug';
+
+// Debugging status → badge variant + label.
+const status = POST_STATUSES.find((s) => s.slug === data.status);
+const statusVariant =
+  data.status === 'workaround'
+    ? 'workaround'
+    : data.status === 'investigating'
+      ? 'investigating'
+      : 'solved';
+
+const mins = readingTime(body);
+---
+
+<BaseLayout title={data.title} description={data.description} image={data.image} type="article">
+  <Container class="max-w-3xl">
+    <!-- Hero -->
+    <div class="pt-10">
+      <a
+        href="/blog"
+        class="font-mono text-[13px] text-[var(--text-muted)] hover:text-[var(--text)]"
+      >
+        ← Blog{type ? ` / ${type.label}` : ''}
+      </a>
+
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        {type && <Badge variant={typeBadgeVariant} label={type.label} />}
+        {
+          data.type === 'debugging' && status && (
+            <Badge variant={statusVariant} label={status.label} />
+          )
+        }
+      </div>
+
+      <h1 class="mt-3 mb-3 text-3xl leading-tight font-bold tracking-[-0.025em] sm:text-4xl">
+        {data.title}
+      </h1>
+
+      <div class="border-b border-[var(--border)] pb-5">
+        <PostMeta
+          publishedAt={data.publishedAt}
+          updatedAt={data.updatedAt}
+          readingTime={mins}
+          difficulty={data.difficulty}
+        />
+      </div>
+    </div>
+
+    <!-- Body + TOC -->
+    <div class="grid grid-cols-1 gap-12 py-8 lg:grid-cols-[1fr_220px]">
+      <article class="prose min-w-0">
+        <!-- TOP callouts: auto-rendered from type-specific frontmatter -->
+        {
+          data.type === 'debugging' && (
+            <>
+              {data.symptom && (
+                <Callout kind="symptom" label="Symptom" icon="⚠" text={data.symptom} />
+              )}
+              {data.environment && (
+                <Callout kind="neutral" label="Environment" icon="🧩" text={data.environment} />
+              )}
+              {data.rootCause && (
+                <Callout kind="rootcause" label="Root cause" icon="🔍" text={data.rootCause} />
+              )}
+            </>
+          )
+        }
+        {
+          data.type === 'implementation' && (
+            <>
+              {data.objective && (
+                <Callout kind="objective" label="Objective" icon="🎯" text={data.objective} />
+              )}
+              {data.prerequisites?.length > 0 && (
+                <Callout kind="prereq" label="Prerequisites" icon="📋">
+                  <ul class="ml-5 list-disc text-[14.5px]">
+                    {data.prerequisites.map((p: string) => (
+                      <li>{p}</li>
+                    ))}
+                  </ul>
+                </Callout>
+              )}
+            </>
+          )
+        }
+        {
+          data.type === 'use-case' && (
+            <>
+              {data.scenario && (
+                <Callout kind="scenario" label="Scenario" icon="💡" text={data.scenario} />
+              )}
+              {data.businessValue && (
+                <Callout kind="value" label="Business value" icon="📈" text={data.businessValue} />
+              )}
+            </>
+          )
+        }
+
+        <!-- The author's detailed writing -->
+        <slot />
+
+        <!-- BOTTOM callout: the resolution / outcome / solution -->
+        {
+          data.type === 'debugging' && data.resolution && (
+            <Callout kind="resolution" label="Resolution" icon="✅" text={data.resolution} />
+          )
+        }
+        {
+          data.type === 'implementation' && data.outcome && (
+            <Callout kind="outcome" label="Outcome" icon="✅" text={data.outcome} />
+          )
+        }
+        {
+          data.type === 'use-case' && data.solution && (
+            <Callout kind="resolution" label="Solution" icon="✅" text={data.solution} />
+          )
+        }
+
+        <!-- Tags -->
+        {
+          data.tags?.length > 0 && (
+            <div class="mt-8 flex flex-wrap gap-2">
+              {data.tags.map((t: string) => (
+                <span class="rounded-full border border-[var(--border)] bg-[var(--bg-subtle)] px-2.5 py-1 text-[12px] text-[var(--text-muted)]">
+                  {t}
+                </span>
+              ))}
+            </div>
+          )
+        }
+      </article>
+
+      <aside class="hidden lg:block">
+        <TableOfContents headings={headings} />
+      </aside>
+    </div>
+  </Container>
+</BaseLayout>

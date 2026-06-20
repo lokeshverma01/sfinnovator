@@ -1,0 +1,63 @@
+---
+/**
+ * PostCard — one row/card in any post list (listing, category, homepage,
+ * related). Shows type badge (+ status badge for debugging), title, excerpt,
+ * date, reading time, and tags. Reused everywhere so cards stay consistent.
+ *
+ * Props:
+ *   post: a blog collection entry ({ id, data, body }).
+ */
+import Badge from './Badge.astro';
+import { postType, POST_STATUSES } from '../../consts';
+import { readingTime } from '../../lib/readingTime';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+const { post } = Astro.props;
+const d = post.data;
+
+const type = postType(d.type);
+const typeVariant =
+  d.type === 'implementation' ? 'impl' : d.type === 'use-case' ? 'usecase' : 'debug';
+
+// status only exists on debugging posts (discriminated union)
+const status = d.type === 'debugging' ? POST_STATUSES.find((s) => s.slug === d.status) : undefined;
+const statusVariant =
+  d.type === 'debugging'
+    ? d.status === 'workaround'
+      ? 'workaround'
+      : d.status === 'investigating'
+        ? 'investigating'
+        : 'solved'
+    : 'solved';
+
+const mins = readingTime(post.body);
+const dateFmt = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: '2-digit',
+  year: 'numeric',
+}).format(d.publishedAt);
+---
+
+<a
+  href={`/blog/${post.id}/`}
+  class="card block rounded-[14px] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[var(--shadow)] transition-transform hover:-translate-y-[2px] hover:border-[var(--accent)]"
+>
+  <div class="mb-2.5 flex flex-wrap items-center gap-2">
+    {type && <Badge variant={typeVariant} label={type.label} />}
+    {status && <Badge variant={statusVariant} label={status.label} />}
+  </div>
+
+  <h2 class="text-[19px] font-semibold tracking-[-0.01em]">{d.title}</h2>
+  <p class="mt-1.5 text-[14.5px] text-[var(--text-muted)]">{d.description}</p>
+
+  <div
+    class="mt-3.5 flex flex-wrap gap-x-3.5 gap-y-1 font-mono text-[12.5px] text-[var(--text-muted)]"
+  >
+    <span>🗓 {dateFmt}</span>
+    <span>⏱ {mins} min read</span>
+    {d.tags.length > 0 && <span>🏷 {d.tags.slice(0, 3).join(' · ')}</span>}
+  </div>
+</a>

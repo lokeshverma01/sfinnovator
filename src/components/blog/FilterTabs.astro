@@ -1,0 +1,40 @@
+---
+/**
+ * FilterTabs — "All / Implementation / Use Case / Debugging" pills that link
+ * to the listing and the per-type category pages. The active tab is derived
+ * from `active` (a type slug, or undefined for "All").
+ *
+ * Props:
+ *   active?: PostTypeSlug — the currently selected type (omit for "All").
+ */
+import { POST_TYPES } from '../../consts';
+
+interface Props {
+  active?: string;
+}
+const { active } = Astro.props;
+
+const tabs = [
+  { slug: undefined, label: 'All', href: '/blog' },
+  ...POST_TYPES.map((t) => ({
+    slug: t.slug,
+    label: `${t.icon} ${t.label}`,
+    href: `/blog/category/${t.slug}`,
+  })),
+];
+
+const base =
+  'rounded-full border px-3.5 py-1.5 text-[13px] transition-colors border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-subtle)]';
+const on =
+  'rounded-full border px-3.5 py-1.5 text-[13px] border-[var(--text)] bg-[var(--text)] text-[var(--bg)]';
+---
+
+<div class="flex flex-wrap gap-2">
+  {
+    tabs.map((t) => (
+      <a href={t.href} class={t.slug === active ? on : base}>
+        {t.label}
+      </a>
+    ))
+  }
+</div>
