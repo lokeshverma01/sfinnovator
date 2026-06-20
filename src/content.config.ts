@@ -34,8 +34,15 @@ const baseFields = {
   featured: z.boolean().default(false),
   /** Custom social share image; falls back to the site default. */
   image: z.string().optional(),
-  /** Draft posts are excluded from the production build. */
-  draft: z.boolean().default(false),
+  /**
+   * Visibility switch — the single control for whether a post is live.
+   *   true  (default) → built, deployed, public.
+   *   false           → excluded from the build entirely (private/inactive);
+   *                     no page, not in listings, RSS, sitemap, or search.
+   * Flip this in frontmatter to take a post public or private without
+   * deleting it. Enforced centrally via getPublishedPosts() in src/lib/posts.ts.
+   */
+  published: z.boolean().default(true),
 };
 
 /**

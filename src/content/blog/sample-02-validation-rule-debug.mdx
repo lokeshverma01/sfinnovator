@@ -1,0 +1,27 @@
+---
+type: debugging
+title: 'Validation rule fires on every update — even when it should not'
+description: 'A field that looks unchanged keeps tripping a validation rule. Here is why and the fix.'
+publishedAt: 2026-05-22
+difficulty: Intermediate
+tags: [Validation Rules, Formula, Debugging]
+status: solved
+symptom: 'A validation rule blocks saves even when the targeted field was not edited.'
+environment: 'Standard object, validation rule using ISCHANGED on a formula field.'
+rootCause: 'ISCHANGED does not work on formula fields; the formula re-evaluates every save.'
+resolution: 'Reference the underlying source fields with ISCHANGED, not the formula field.'
+---
+
+## What we expected
+
+The rule should only fire when the user changes the amount.
+
+## What actually happened
+
+It fired on every save. Formula fields are recalculated each save, so ISCHANGED is always true.
+
+## Fix
+
+```
+AND( ISCHANGED(Amount__c), Amount__c > 10000 )
+```

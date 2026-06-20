@@ -1,0 +1,31 @@
+---
+type: implementation
+title: 'Build a multi-step Screen Flow wizard'
+description: 'Guide users through a branching, multi-screen intake form using only Flow Builder.'
+publishedAt: 2026-05-28
+difficulty: Beginner
+tags: [Flow, Screen Flow, Automation]
+objective: 'Create a guided, multi-screen intake wizard with conditional branching, no code.'
+prerequisites:
+  - 'Flow Builder access'
+  - 'A custom object to store the intake record'
+outcome: 'A reusable Screen Flow that collects and routes intake data with validation.'
+---
+
+## Plan the screens
+
+Sketch the steps before building: welcome, details, conditional branch, review, confirm.
+
+## Build it
+
+1. New **Screen Flow** in Flow Builder.
+2. Add Screen elements for each step.
+3. Use a **Decision** element to branch.
+
+```apex
+// Optional invocable to post-process the record
+public class IntakeRouter {
+    @InvocableMethod
+    public static void route(List<Id> recordIds) { /* ... */ }
+}
+```

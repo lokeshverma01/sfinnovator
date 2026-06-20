@@ -1,0 +1,26 @@
+---
+type: debugging
+title: 'SOQL injection in a dynamic query — and the safe rewrite'
+description: 'A search feature built with string concatenation is exploitable. Fix it with bind variables.'
+publishedAt: 2026-04-04
+difficulty: Advanced
+tags: [Apex, Security, SOQL]
+status: solved
+symptom: 'User input flows directly into a dynamic SOQL string.'
+environment: 'Apex controller building a query from a search box value.'
+rootCause: 'String concatenation of untrusted input into Database.query().'
+resolution: 'Use bind variables or String.escapeSingleQuotes(); prefer static SOQL where possible.'
+---
+
+## Vulnerable
+
+```apex
+String q = 'SELECT Id FROM Account WHERE Name = \'' + userInput + '\'';
+List<Account> a = Database.query(q);
+```
+
+## Safe
+
+```apex
+List<Account> a = [SELECT Id FROM Account WHERE Name = :userInput];
+```

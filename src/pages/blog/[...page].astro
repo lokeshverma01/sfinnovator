@@ -6,16 +6,14 @@
  * (POSTS_PER_PAGE each). The `[...page]` rest param makes page 1 live at
  * /blog and the rest at /blog/<n>.
  */
-import { getCollection } from 'astro:content';
 import BlogListing from '../../layouts/BlogListing.astro';
 import { POSTS_PER_PAGE } from '../../consts';
+import { getPublishedPosts } from '../../lib/posts';
 import type { GetStaticPaths, Page } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const posts = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
-    (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
-  );
+  const posts = await getPublishedPosts();
   return paginate(posts, { pageSize: POSTS_PER_PAGE });
 }) satisfies GetStaticPaths;
 

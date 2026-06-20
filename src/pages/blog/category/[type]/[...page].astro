@@ -6,16 +6,14 @@
  * getStaticPaths loops the post types and paginates each type's posts,
  * tagging every generated path with its type slug via the `params`.
  */
-import { getCollection } from 'astro:content';
 import BlogListing from '../../../../layouts/BlogListing.astro';
 import { POST_TYPES, POSTS_PER_PAGE, postType } from '../../../../consts';
+import { getPublishedPosts } from '../../../../lib/posts';
 import type { GetStaticPaths, Page } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const all = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
-    (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
-  );
+  const all = await getPublishedPosts();
 
   // For each type, paginate just that type's posts and carry the slug in params.
   return POST_TYPES.flatMap((t) => {
