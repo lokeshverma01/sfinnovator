@@ -175,11 +175,18 @@ Each entry: **Path · Purpose · Props · Depends on · Used by · Notes.**
   (`mdx`, `sitemap`), Tailwind Vite plugin, and **`security.csp`** (directives +
   `scriptDirective.hashes` with the auto-derived hash of `lib/themeScript.mjs`).
 
-### `public/staticwebapp.config.json`
+### `public/_headers` + `public/_redirects` (Cloudflare Pages — primary host)
 
-- **Sets:** host security headers (HSTS, frame-options, etc.), asset caching, 404 rewrite.
-- **Scope:** Azure Static Web Apps. (Cloudflare uses `_headers` — see SECURITY.md when we
-  migrate.)
+- **`_headers`:** host security headers (HSTS, nosniff, frame-options, referrer,
+  permissions, COOP) + cache rules for `/_astro/*` and `/images/*`.
+- **`_redirects`:** redirect/rewrite rules (none needed yet; Astro's static `404.html` is
+  served automatically).
+- **Scope:** Cloudflare Pages reads these from the deployed `dist/`.
+
+### `public/staticwebapp.config.json` (Azure — parity only)
+
+- **Sets:** the same host security headers/caching for Azure Static Web Apps.
+- **Scope:** ignored by Cloudflare; kept so an Azure deploy stays possible.
 
 ---
 

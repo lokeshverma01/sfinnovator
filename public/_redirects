@@ -1,0 +1,5 @@
+# Cloudflare Pages redirects/rewrites.
+# Format: <from>  <to>  <status>
+# Astro already emits a static 404.html, which Cloudflare serves automatically
+# for unmatched routes — so no catch-all is required here yet.
+# Add redirects below as the site grows (e.g. old URL -> new URL, 301).
