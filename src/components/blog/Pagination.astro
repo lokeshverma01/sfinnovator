@@ -1,0 +1,62 @@
+---
+/**
+ * Pagination — prev / numbered / next controls for paginated lists.
+ * Works for both /blog and /blog/category/<type>.
+ *
+ * Props:
+ *   currentPage, lastPage: numbers (1-based)
+ *   baseUrl: path prefix WITHOUT trailing slash, e.g. "/blog" or
+ *            "/blog/category/debugging". Page 1 = baseUrl + "/",
+ *            page N = baseUrl + "/N/".
+ */
+interface Props {
+  currentPage: number;
+  lastPage: number;
+  baseUrl: string;
+}
+const { currentPage, lastPage, baseUrl } = Astro.props;
+
+const hrefFor = (page: number) => (page === 1 ? `${baseUrl}/` : `${baseUrl}/${page}/`);
+const pages = Array.from({ length: lastPage }, (_, i) => i + 1);
+
+const baseLink =
+  'grid h-[38px] min-w-[38px] place-items-center rounded-[9px] border border-[var(--border)] text-sm text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text)]';
+const activeLink =
+  'grid h-[38px] min-w-[38px] place-items-center rounded-[9px] border border-[var(--accent)] bg-[var(--accent)] text-sm font-medium text-white';
+const disabledLink =
+  'grid h-[38px] min-w-[38px] cursor-not-allowed place-items-center rounded-[9px] border border-[var(--border)] text-sm text-[var(--text-muted)] opacity-40';
+---
+
+{
+  lastPage > 1 && (
+    <nav class="my-10 flex justify-center gap-1.5 font-mono" aria-label="Pagination">
+      {currentPage > 1 ? (
+        <a href={hrefFor(currentPage - 1)} class={baseLink} aria-label="Previous page">
+          ‹
+        </a>
+      ) : (
+        <span class={disabledLink}>‹</span>
+      )}
+
+      {pages.map((p) =>
+        p === currentPage ? (
+          <span class={activeLink} aria-current="page">
+            {p}
+          </span>
+        ) : (
+          <a href={hrefFor(p)} class={baseLink}>
+            {p}
+          </a>
+        )
+      )}
+
+      {currentPage < lastPage ? (
+        <a href={hrefFor(currentPage + 1)} class={baseLink} aria-label="Next page">
+          ›
+        </a>
+      ) : (
+        <span class={disabledLink}>›</span>
+      )}
+    </nav>
+  )
+}

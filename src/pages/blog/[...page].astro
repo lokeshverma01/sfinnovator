@@ -1,0 +1,32 @@
+---
+/**
+ * /blog and /blog/2, /blog/3 … — the paginated blog listing.
+ *
+ * Astro's paginate() pre-generates one static page per slice of posts
+ * (POSTS_PER_PAGE each). The `[...page]` rest param makes page 1 live at
+ * /blog and the rest at /blog/<n>.
+ */
+import { getCollection } from 'astro:content';
+import BlogListing from '../../layouts/BlogListing.astro';
+import { POSTS_PER_PAGE } from '../../consts';
+import type { GetStaticPaths, Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
+    (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
+  );
+  return paginate(posts, { pageSize: POSTS_PER_PAGE });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<CollectionEntry<'blog'>> };
+---
+
+<BlogListing
+  title="Blog"
+  subtitle="End-to-end implementations, real use cases, and debugging write-ups."
+  posts={page.data}
+  currentPage={page.currentPage}
+  lastPage={page.lastPage}
+  baseUrl="/blog"
+/>

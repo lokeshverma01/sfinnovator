@@ -1,0 +1,29 @@
+---
+/**
+ * SearchBox — the blog search input.
+ *
+ * NOTE: this renders the styled input + a results container now. The actual
+ * instant-search engine (Pagefind) is wired in a later step; Pagefind's UI
+ * script attaches to #search by id. Until then the box is inert but present,
+ * so the listing layout is complete and the design is locked.
+ */
+---
+
+<div id="search" class="relative" data-pagefind-search>
+  <svg
+    class="pointer-events-none absolute top-3.5 left-3.5 h-[18px] w-[18px] text-[var(--text-muted)]"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  >
+    <circle cx="11" cy="11" r="7"></circle>
+    <path d="M21 21l-4-4" stroke-linecap="round"></path>
+  </svg>
+  <input
+    type="search"
+    placeholder="Search posts…"
+    aria-label="Search posts"
+    class="w-full rounded-[11px] border border-[var(--border)] bg-[var(--bg-subtle)] py-3 pr-4 pl-10 text-[15px] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
+  />
+</div>

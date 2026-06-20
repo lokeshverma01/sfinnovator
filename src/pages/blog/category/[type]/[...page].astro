@@ -1,0 +1,45 @@
+---
+/**
+ * /blog/category/<type> and /blog/category/<type>/<n> — posts of one type,
+ * paginated. One static page set is generated per POST_TYPE.
+ *
+ * getStaticPaths loops the post types and paginates each type's posts,
+ * tagging every generated path with its type slug via the `params`.
+ */
+import { getCollection } from 'astro:content';
+import BlogListing from '../../../../layouts/BlogListing.astro';
+import { POST_TYPES, POSTS_PER_PAGE, postType } from '../../../../consts';
+import type { GetStaticPaths, Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const all = (await getCollection('blog', ({ data }) => data.draft !== true)).sort(
+    (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
+  );
+
+  // For each type, paginate just that type's posts and carry the slug in params.
+  return POST_TYPES.flatMap((t) => {
+    const ofType = all.filter((p) => p.data.type === t.slug);
+    return paginate(ofType, {
+      pageSize: POSTS_PER_PAGE,
+      params: { type: t.slug },
+    });
+  });
+}) satisfies GetStaticPaths;
+
+const { type } = Astro.params;
+const { page } = Astro.props as { page: Page<CollectionEntry<'blog'>> };
+const def = postType(type!);
+---
+
+<BlogListing
+  title={def ? `${def.icon} ${def.label}` : 'Blog'}
+  subtitle={def?.blurb ?? ''}
+  posts={page.data}
+  activeType={type}
+  currentPage={page.currentPage}
+  lastPage={page.lastPage}
+  baseUrl={`/blog/category/${type}`}
+  seoTitle={def ? `${def.label} posts` : 'Blog'}
+  seoDescription={def?.blurb}
+/>
