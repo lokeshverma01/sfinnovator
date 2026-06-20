@@ -1,0 +1,73 @@
+---
+/**
+ * TableOfContents — sticky "On this page" nav, auto-built from the post's
+ * H2/H3 headings (Astro provides these from the rendered MDX). The active
+ * link highlights on scroll via a small processed script (CSP-safe, bundled).
+ *
+ * Props:
+ *   headings: Astro's MarkdownHeading[] ({ depth, slug, text }).
+ */
+import type { MarkdownHeading } from 'astro';
+interface Props {
+  headings: MarkdownHeading[];
+}
+const { headings } = Astro.props;
+
+// Only H2 + H3 make a clean, shallow TOC.
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  toc.length > 0 && (
+    <nav
+      class="toc sticky top-[88px] self-start font-mono text-[13.5px]"
+      aria-label="Table of contents"
+    >
+      <h4 class="mb-3 text-[11px] font-semibold tracking-[0.08em] text-[var(--text-muted)] uppercase">
+        On this page
+      </h4>
+      <ul>
+        {toc.map((h) => (
+          <li>
+            <a
+              href={`#${h.slug}`}
+              data-toc-link={h.slug}
+              class:list={[
+                'block border-l-2 border-[var(--border)] py-[5px] text-[var(--text-muted)] hover:text-[var(--text)]',
+                h.depth === 3 ? 'pl-6' : 'pl-3',
+              ]}
+            >
+              {h.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<script>
+  // Highlight the TOC link for the section currently in view.
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+  if (links.length) {
+    const bySlug = new Map(links.map((l) => [l.dataset.tocLink, l]));
+    const headings = links
+      .map((l) => document.getElementById(l.dataset.tocLink!))
+      .filter((el): el is HTMLElement => el !== null);
+
+    const activate = (slug: string) => {
+      links.forEach((l) => l.classList.remove('toc-active'));
+      bySlug.get(slug)?.classList.add('toc-active');
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) activate(entry.target.id);
+        }
+      },
+      { rootMargin: '-80px 0px -70% 0px', threshold: 0 }
+    );
+    headings.forEach((h) => observer.observe(h));
+  }
+</script>

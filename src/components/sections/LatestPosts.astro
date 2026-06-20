@@ -7,9 +7,9 @@
  */
 import Container from '../ui/Container.astro';
 import { getCollection } from 'astro:content';
-import { BLOG_CATEGORIES } from '../../consts';
+import { postType } from '../../consts';
 
-const categoryLabel = (slug: string) => BLOG_CATEGORIES.find((c) => c.slug === slug)?.label ?? slug;
+const typeLabel = (slug: string) => postType(slug)?.label ?? slug;
 
 const dateFmt = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -57,7 +57,7 @@ const posts = (await getCollection('blog', ({ data }) => data.draft !== true))
                 {dateFmt.format(post.data.publishedAt)}
                 <br />
                 <span class="mt-1 inline-block rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--accent)]">
-                  {categoryLabel(post.data.category)}
+                  {typeLabel(post.data.type)}
                 </span>
               </div>
               <div>

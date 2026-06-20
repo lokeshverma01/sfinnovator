@@ -4,27 +4,16 @@
  * soft shadow, and hover lift. Mirrors the approved mockup.
  */
 import Container from '../ui/Container.astro';
+import { POST_TYPES } from '../../consts';
 
-const features = [
-  {
-    icon: '📘',
-    title: 'Implementations',
-    href: '/blog/category/implementations',
-    body: 'End-to-end builds of Salesforce out-of-the-box features, start to finish.',
-  },
-  {
-    icon: '🧩',
-    title: 'Use Cases',
-    href: '/blog/category/use-cases',
-    body: 'Real business scenarios solved with Salesforce — the why and the how.',
-  },
-  {
-    icon: '🐞',
-    title: 'Debugging',
-    href: '/blog/category/debugging',
-    body: 'Error scenarios, root-cause analysis, and the solutions that fixed them.',
-  },
-];
+// Derived from the single source of truth so cards, labels, icons, and links
+// always match the schema + listing filters.
+const features = POST_TYPES.map((t) => ({
+  icon: t.icon,
+  title: t.label,
+  href: `/blog/category/${t.slug}`,
+  body: t.blurb,
+}));
 ---
 
 <section class="py-16">

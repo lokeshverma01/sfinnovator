@@ -36,6 +36,20 @@
   --border: #e7e9ee;
   --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.04);
   --grid-line: rgba(15, 23, 42, 0.035);
+
+  /* Post type + status colours (badges + callout accents). */
+  --c-impl: #0176d3;
+  --c-impl-bg: rgba(1, 118, 211, 0.1);
+  --c-usecase: #7c3aed;
+  --c-usecase-bg: rgba(124, 58, 237, 0.1);
+  --c-debug: #d9480f;
+  --c-debug-bg: rgba(217, 72, 15, 0.1);
+  --c-solved: #1f9d55;
+  --c-solved-bg: rgba(31, 157, 85, 0.12);
+  --c-workaround: #b7791f;
+  --c-workaround-bg: rgba(183, 121, 31, 0.12);
+  --c-investigating: #5a6270;
+  --c-investigating-bg: rgba(90, 98, 112, 0.12);
 }
 
 .dark {
@@ -51,6 +65,20 @@
   --border: #23262d;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 30px rgba(0, 0, 0, 0.35);
   --grid-line: rgba(255, 255, 255, 0.03);
+
+  /* Post type + status colours — brightened for dark backgrounds. */
+  --c-impl: #2a9bf4;
+  --c-impl-bg: rgba(42, 155, 244, 0.14);
+  --c-usecase: #a78bfa;
+  --c-usecase-bg: rgba(167, 139, 250, 0.14);
+  --c-debug: #fb923c;
+  --c-debug-bg: rgba(251, 146, 60, 0.14);
+  --c-solved: #4ade80;
+  --c-solved-bg: rgba(74, 222, 128, 0.14);
+  --c-workaround: #fbbf24;
+  --c-workaround-bg: rgba(251, 191, 36, 0.14);
+  --c-investigating: #9aa1ad;
+  --c-investigating-bg: rgba(154, 161, 173, 0.14);
 }
 
 html {
@@ -106,4 +134,194 @@ button,
   background-size: 40px 40px;
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 40%, transparent 75%);
   mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 40%, transparent 75%);
+}
+
+/*
+ * Badge colour variants (class-based, CSP-safe — no inline styles).
+ * Used by components/blog/Badge.astro. `currentColor` lets the dot inherit
+ * the text colour automatically.
+ */
+.badge-impl {
+  color: var(--c-impl);
+  background: var(--c-impl-bg);
+}
+.badge-usecase {
+  color: var(--c-usecase);
+  background: var(--c-usecase-bg);
+}
+.badge-debug {
+  color: var(--c-debug);
+  background: var(--c-debug-bg);
+}
+.badge-solved {
+  color: var(--c-solved);
+  background: var(--c-solved-bg);
+}
+.badge-workaround {
+  color: var(--c-workaround);
+  background: var(--c-workaround-bg);
+}
+.badge-investigating {
+  color: var(--c-investigating);
+  background: var(--c-investigating-bg);
+}
+
+/*
+ * Callout boxes (the auto-rendered structured frontmatter fields).
+ * Base box + per-kind left-border + label colour. Class-based for CSP.
+ */
+.callout {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  background: var(--bg-subtle);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 18px 0;
+}
+.callout > .callout-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.callout-symptom {
+  border-left-color: var(--c-debug);
+}
+.callout-symptom > .callout-label {
+  color: var(--c-debug);
+}
+.callout-rootcause {
+  border-left-color: var(--c-workaround);
+}
+.callout-rootcause > .callout-label {
+  color: var(--c-workaround);
+}
+.callout-resolution,
+.callout-outcome {
+  border-left-color: var(--c-solved);
+}
+.callout-resolution > .callout-label,
+.callout-outcome > .callout-label {
+  color: var(--c-solved);
+}
+.callout-prereq,
+.callout-objective {
+  border-left-color: var(--accent);
+}
+.callout-prereq > .callout-label,
+.callout-objective > .callout-label {
+  color: var(--accent);
+}
+.callout-scenario,
+.callout-value {
+  border-left-color: var(--c-usecase);
+}
+.callout-scenario > .callout-label,
+.callout-value > .callout-label {
+  color: var(--c-usecase);
+}
+.callout-neutral {
+  border-left-color: var(--text-muted);
+}
+.callout-neutral > .callout-label {
+  color: var(--text-muted);
+}
+
+/* Active table-of-contents link (set by the TOC scroll-spy script). */
+.toc-active {
+  color: var(--accent) !important;
+  border-left-color: var(--accent) !important;
+  font-weight: 550;
+}
+
+/*
+ * Prose — typographic styling for the rendered MDX post body.
+ * Scoped to .prose so it never leaks into the rest of the UI. Uses theme
+ * tokens so it adapts to light/dark. `scroll-mt` keeps anchored headings
+ * clear of the sticky header when jumped to from the TOC.
+ */
+.prose {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text);
+}
+.prose h2 {
+  font-size: 23px;
+  font-weight: 680;
+  letter-spacing: -0.015em;
+  margin: 36px 0 12px;
+  scroll-margin-top: 88px;
+}
+.prose h3 {
+  font-size: 18px;
+  font-weight: 640;
+  margin: 26px 0 10px;
+  scroll-margin-top: 88px;
+}
+.prose p {
+  margin: 14px 0;
+}
+.prose ul,
+.prose ol {
+  margin: 14px 0 14px 22px;
+}
+.prose li {
+  margin: 6px 0;
+}
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose a:hover {
+  color: var(--accent-hover);
+}
+.prose strong {
+  font-weight: 650;
+}
+.prose blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 16px;
+  margin: 18px 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.prose img {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin: 20px 0;
+  max-width: 100%;
+  height: auto;
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 32px 0;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 14.5px;
+}
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+.prose th {
+  background: var(--bg-subtle);
+  font-weight: 640;
 }
