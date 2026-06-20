@@ -1,0 +1,14 @@
+---
+/**
+ * Container — constrains content width and adds responsive horizontal padding.
+ * Keeps every section aligned to the same readable measure.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<div class={`mx-auto w-full max-w-5xl px-5 sm:px-6 lg:px-8 ${className}`}>
+  <slot />
+</div>

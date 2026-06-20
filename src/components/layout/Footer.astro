@@ -1,0 +1,28 @@
+---
+/**
+ * Footer — minimal: copyright + social/RSS links.
+ */
+import Container from '../ui/Container.astro';
+import { SITE, SOCIAL_LINKS } from '../../consts';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-24 border-t border-[var(--border)] py-10">
+  <Container>
+    <div
+      class="flex flex-col items-center justify-between gap-4 text-sm text-[var(--text-muted)] sm:flex-row"
+    >
+      <p>© {year} {SITE.name}. All rights reserved.</p>
+      <nav class="flex items-center gap-5">
+        {
+          SOCIAL_LINKS.map((link) => (
+            <a href={link.href} class="hover:text-[var(--text)]">
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+  </Container>
+</footer>

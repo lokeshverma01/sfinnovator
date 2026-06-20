@@ -1,0 +1,33 @@
+---
+/**
+ * Hero — the first thing visitors see. Clear headline, one-line value
+ * proposition, and two primary calls to action. Intentionally text-first.
+ */
+import Container from '../ui/Container.astro';
+---
+
+<section class="py-24 sm:py-32">
+  <Container class="text-center">
+    <h1 class="mx-auto max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
+      Salesforce, explained well.
+    </h1>
+    <p class="mx-auto mt-6 max-w-2xl text-lg text-[var(--text-muted)]">
+      Real implementations, use-case solutions, and debugging walkthroughs from
+      hands-on Salesforce work — written to be practical, not theoretical.
+    </p>
+    <div class="mt-10 flex items-center justify-center gap-4">
+      <a
+        href="/blog"
+        class="rounded-md bg-[var(--color-accent)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2"
+      >
+        Read the blog
+      </a>
+      <a
+        href="/portfolio"
+        class="rounded-md border border-[var(--border)] px-5 py-2.5 text-sm font-medium hover:bg-[var(--bg-subtle)]"
+      >
+        View portfolio
+      </a>
+    </div>
+  </Container>
+</section>

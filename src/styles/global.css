@@ -1,0 +1,79 @@
+/* Tailwind CSS v4 — single import. */
+@import 'tailwindcss';
+
+/*
+ * Enable class-based dark mode.
+ * The `dark` class is toggled on <html> by the theme script in BaseLayout.
+ * `@custom-variant` lets us write `dark:` utilities driven by that class.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens.
+ * Defined as CSS variables so both Tailwind utilities and raw CSS can use them.
+ * Light values are the default; the `.dark` block overrides them.
+ */
+@theme {
+  /* Brand accent — Salesforce blue */
+  --color-accent: #0176d3;
+  --color-accent-hover: #0b5cab;
+
+  /* Typography */
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+/* Light theme (default) */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f7f8fa;
+  --text: #1a1a1a;
+  --text-muted: #5a5f6a;
+  --border: #e6e8eb;
+}
+
+/* Dark theme */
+.dark {
+  --bg: #0a0a0a;
+  --bg-subtle: #141414;
+  --text: #ededed;
+  --text-muted: #a0a4ad;
+  --border: #262626;
+}
+
+/*
+ * Smooth, tasteful theme transition.
+ * Only color-related properties transition — never layout — so toggling
+ * feels smooth without janky reflows.
+ */
+html {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+}
+
+body,
+header,
+footer,
+section,
+a,
+button {
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,45 @@
+---
+/**
+ * Features — three cards mapping to the three blog categories.
+ * Driven by BLOG_CATEGORIES so it stays in sync with the rest of the site.
+ */
+import Container from '../ui/Container.astro';
+
+const features = [
+  {
+    title: 'Implementations',
+    href: '/blog/category/implementations',
+    body: 'End-to-end builds of Salesforce out-of-the-box features, start to finish.',
+  },
+  {
+    title: 'Use Cases',
+    href: '/blog/category/use-cases',
+    body: 'Real business scenarios solved with Salesforce — the why and the how.',
+  },
+  {
+    title: 'Debugging',
+    href: '/blog/category/debugging',
+    body: 'Error scenarios, root-cause analysis, and the solutions that fixed them.',
+  },
+];
+---
+
+<section class="pb-8">
+  <Container>
+    <div class="grid gap-6 sm:grid-cols-3">
+      {
+        features.map((f) => (
+          <a
+            href={f.href}
+            class="group rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] p-6 hover:border-[var(--color-accent)]"
+          >
+            <h2 class="text-base font-semibold group-hover:text-[var(--color-accent)]">
+              {f.title}
+            </h2>
+            <p class="mt-2 text-sm text-[var(--text-muted)]">{f.body}</p>
+          </a>
+        ))
+      }
+    </div>
+  </Container>
+</section>

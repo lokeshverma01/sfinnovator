@@ -1,0 +1,15 @@
+---
+/**
+ * Landing page (/) — the goal of Phase 1.
+ * Composes the Hero and Features sections inside the BaseLayout shell.
+ * SEO uses the site defaults (no props needed).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import Features from '../components/sections/Features.astro';
+---
+
+<BaseLayout>
+  <Hero />
+  <Features />
+</BaseLayout>
