@@ -28,6 +28,14 @@ export default defineConfig({
   //  - sitemap: auto-generates /sitemap-index.xml for SEO
   integrations: [mdx(), sitemap()],
 
+  // Syntax highlighting: Prism (class-based) instead of the default Shiki.
+  // Shiki emits inline `style=` on every token, which violates our strict
+  // `style-src` CSP. Prism emits `<span class="token …">` styled by our own
+  // stylesheet (src/styles/prism.css) — fully CSP-compatible.
+  markdown: {
+    syntaxHighlight: 'prism',
+  },
+
   // Tailwind v4 is wired through the Vite plugin (no tailwind.config.js needed).
   vite: {
     plugins: [tailwindcss()],

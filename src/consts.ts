@@ -35,11 +35,59 @@ export const SOCIAL_LINKS: { label: string; href: string }[] = [
 ];
 
 /**
- * Blog categories — these map to your three blog types.
- * Used later for the blog listing filters and post frontmatter validation.
+ * Post types — the three kinds of writing on this site.
+ * This is the single source of truth: the content schema validates against
+ * these slugs, the listing filters use these labels, and the badge colours
+ * are driven by the same `slug`. Add a type here only if the template + schema
+ * are updated to match.
+ *
+ *   slug   → frontmatter `type:` value + URL (/blog/category/<slug>)
+ *   label  → human label on badges, tabs, headings
+ *   icon   → emoji shown on tabs/cards
+ *   blurb  → one-liner used on the homepage feature cards
  */
-export const BLOG_CATEGORIES = [
-  { slug: 'implementations', label: 'Implementations' },
-  { slug: 'use-cases', label: 'Use Cases' },
-  { slug: 'debugging', label: 'Debugging' },
+export const POST_TYPES = [
+  {
+    slug: 'implementation',
+    label: 'Implementation',
+    icon: '📘',
+    blurb: 'End-to-end builds of Salesforce out-of-the-box features, start to finish.',
+  },
+  {
+    slug: 'use-case',
+    label: 'Use Case',
+    icon: '🧩',
+    blurb: 'Real business scenarios solved with Salesforce — the why and the how.',
+  },
+  {
+    slug: 'debugging',
+    label: 'Debugging',
+    icon: '🐞',
+    blurb: 'Error scenarios, root-cause analysis, and the solutions that fixed them.',
+  },
 ] as const;
+
+export type PostTypeSlug = (typeof POST_TYPES)[number]['slug'];
+
+/** Lookup helper: slug → type definition. */
+export const postType = (slug: string) => POST_TYPES.find((t) => t.slug === slug);
+
+/**
+ * Status values for debugging posts (mirrors the Salesforce Known Issues feel).
+ * `slug` → frontmatter `status:` value; drives the colour-coded status badge.
+ */
+export const POST_STATUSES = [
+  { slug: 'solved', label: 'Solved' },
+  { slug: 'workaround', label: 'Workaround' },
+  { slug: 'investigating', label: 'Investigating' },
+] as const;
+
+export type PostStatusSlug = (typeof POST_STATUSES)[number]['slug'];
+
+/** Difficulty levels (optional metadata on any post). */
+export const DIFFICULTY_LEVELS = ['Beginner', 'Intermediate', 'Advanced'] as const;
+
+/**
+ * Blog listing pagination — posts per page on /blog and /blog/[page].
+ */
+export const POSTS_PER_PAGE = 10;

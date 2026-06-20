@@ -1,0 +1,23 @@
+---
+type: implementation
+title: 'Decouple systems with Platform Events'
+description: 'Publish and subscribe to Platform Events for an event-driven integration.'
+publishedAt: 2026-04-11
+difficulty: Advanced
+tags: [Platform Events, Integration, Apex]
+objective: 'Replace a tightly-coupled callout chain with an event-driven pub/sub model.'
+prerequisites:
+  - 'A defined Platform Event'
+  - 'Apex or Flow to publish/subscribe'
+outcome: 'Loosely-coupled services that react to events asynchronously.'
+---
+
+## Publish
+
+```apex
+EventBus.publish(new Order_Event__e(OrderId__c = o.Id, Status__c = 'Shipped'));
+```
+
+## Subscribe
+
+Use an after-insert trigger on the event or a Flow subscriber.

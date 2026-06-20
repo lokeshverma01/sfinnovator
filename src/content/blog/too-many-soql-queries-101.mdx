@@ -1,0 +1,54 @@
+---
+type: debugging
+title: '"Too many SOQL queries: 101" — the real root cause and fix'
+description: 'Why this governor limit fires in triggers, how to find it fast, and the bulkification pattern that permanently fixes it.'
+publishedAt: 2026-06-20
+updatedAt: 2026-06-21
+difficulty: Intermediate
+tags: [Apex, Triggers, Governor Limits, Bulkification]
+status: solved
+symptom: 'System.LimitException: Too many SOQL queries: 101 — thrown when saving Accounts in bulk.'
+environment: 'Apex trigger on Account, bulk DML (Data Loader, 200 rows).'
+rootCause: 'A SOQL query placed inside a for-loop runs once per record, so 101 records means 101 queries.'
+resolution: 'Move SOQL out of loops: query once with an IN clause and use a Map. The transaction then runs a single query regardless of record volume.'
+---
+
+## What the error actually means
+
+Salesforce enforces a governor limit of **100 SOQL queries per synchronous
+transaction**. The 101st query throws `System.LimitException` immediately. In bulk
+operations this surfaces fast, because a trigger runs against many records at once.
+
+## Reproducing it
+
+1. Create a trigger that queries Contacts for each Account in a loop.
+2. Load 200 Accounts via Data Loader.
+3. Observe the `LimitException` at around record 101.
+
+```apex
+// ❌ Anti-pattern: SOQL inside the loop
+for (Account a : Trigger.new) {
+    List<Contact> cs = [SELECT Id FROM Contact WHERE AccountId = :a.Id];
+}
+```
+
+## The fix — bulkify
+
+Query once outside the loop and build a map in memory:
+
+```apex
+// ✅ One query, mapped in memory
+Map<Id, Account> byId = new Map<Id, Account>(Trigger.new);
+List<Contact> cs = [
+    SELECT Id, AccountId FROM Contact
+    WHERE AccountId IN :byId.keySet()
+];
+```
+
+Now the transaction runs a **single** query no matter how many records are processed.
+
+## Key takeaways
+
+- Never put SOQL or DML inside a loop.
+- Think in collections: query once, process in memory.
+- Test triggers with 200+ records to catch limits before production.

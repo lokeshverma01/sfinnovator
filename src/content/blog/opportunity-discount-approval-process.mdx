@@ -1,0 +1,51 @@
+---
+type: implementation
+title: 'Build an Opportunity discount approval process — no code'
+description: 'A complete, clickable walkthrough using only out-of-the-box approval processes, with every configuration step.'
+publishedAt: 2026-06-14
+difficulty: Beginner
+tags: [Approvals, Sales Cloud, Automation]
+objective: 'Require manager approval whenever a sales rep applies a discount above 20% on an Opportunity — entirely with declarative tools.'
+prerequisites:
+  - 'System Administrator access to a Salesforce org (or a Developer Edition).'
+  - 'A Discount Percent field on the Opportunity object.'
+  - 'A role hierarchy so each rep has a manager.'
+outcome: "Opportunities with a >20% discount are locked and routed to the rep's manager for approval, with email alerts and full history — no Apex required."
+---
+
+## Why an approval process
+
+Discount governance is a classic use of Salesforce's built-in **approval processes**.
+They lock the record, route it to the right approver, and track every decision — all
+declaratively.
+
+## Step 1 — Create the approval process
+
+1. Setup → **Approval Processes** → select **Opportunity**.
+2. Use the **Jump Start Wizard** for a single-step approval.
+3. Name it `Discount Over 20%`.
+
+## Step 2 — Entry criteria
+
+Set the criteria so only high discounts enter the process:
+
+```
+Opportunity: Discount Percent  greater than  20
+```
+
+## Step 3 — Approver and actions
+
+- **Approver:** _Automatically assign to the submitter's manager._
+- **On submit:** lock the record and set a `Discount Status` field to `Pending`.
+- **On approval:** unlock and set `Discount Status` to `Approved`.
+- **On rejection:** unlock and set `Discount Status` to `Rejected`.
+
+## Step 4 — Test it
+
+Create an Opportunity with a 25% discount and click **Submit for Approval**. It should
+lock and notify the manager. Approve it as the manager and confirm it unlocks.
+
+## Notes
+
+Keep the process single-step to start; you can add escalation or multiple approvers
+later without rebuilding it.

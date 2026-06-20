@@ -1,0 +1,27 @@
+---
+/**
+ * /blog/<slug> — renders a single post through the BlogPost template.
+ *
+ * getStaticPaths pre-generates one static page per published post at build
+ * time. The post's MDX body is rendered to <Content/>, and its headings feed
+ * the Table of Contents.
+ */
+import { render } from 'astro:content';
+import BlogPost from '../../layouts/BlogPost.astro';
+import { getPublishedPosts } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<BlogPost data={post.data} headings={headings} body={post.body}>
+  <Content />
+</BlogPost>

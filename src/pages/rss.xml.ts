@@ -3,12 +3,12 @@
  * Good for SEO + lets readers subscribe.
  */
 import rss from '@astrojs/rss';
-import { getCollection } from 'astro:content';
 import { SITE } from '../consts';
+import { getPublishedPosts } from '../lib/posts';
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
-  const posts = await getCollection('blog', ({ data }) => data.draft !== true);
+  const posts = await getPublishedPosts();
 
   return rss({
     title: SITE.name,
