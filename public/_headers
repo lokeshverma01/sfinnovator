@@ -1,0 +1,23 @@
+# Cloudflare Pages security & caching headers.
+# This file is Cloudflare's equivalent of Azure's staticwebapp.config.json.
+# Cloudflare Pages reads /_headers from the deployed output (dist/).
+#
+# The Content-Security-Policy itself is emitted per-page by Astro as a <meta>
+# (with script/style hashes) — see astro.config.mjs. The headers below are the
+# host-level protections a static CDN must add.
+
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# Hashed, content-addressed build assets — cache forever.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Static images — cache a week.
+/images/*
+  Cache-Control: public, max-age=604800

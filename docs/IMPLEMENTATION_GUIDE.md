@@ -261,6 +261,66 @@ See [`SECURITY.md`](./SECURITY.md) for the full rationale and the go-live checkl
 
 ---
 
+## Phase 1.7 — Cloudflare Pages deploy (chosen host)
+
+🧠 Decision: host on **Cloudflare Pages** (root-domain serving, unlimited bandwidth, free,
+per-branch previews). The existing `lokesh-portfolio` repo on Azure is left untouched.
+
+### 1.7.1 Host-specific config
+
+📁 Added:
+
+- `public/_headers` — Cloudflare's security-headers + caching file (mirrors the Azure
+  `staticwebapp.config.json`). Ships to `dist/_headers`.
+- `public/_redirects` — redirect rules (empty; Astro's `404.html` is auto-served).
+
+✅ Confirm they ship:
+
+```bash
+npm run build
+ls dist/_headers dist/_redirects
+```
+
+### 1.7.2 Rehearse the deploy locally (no install needed)
+
+🧠 `wrangler` is Cloudflare's CLI. We use `npx` so nothing is installed globally.
+
+⌨️ One-time auth (interactive — run it yourself in the terminal):
+
+```bash
+! npx wrangler login
+```
+
+⌨️ Build, then deploy to a throwaway Pages project to rehearse:
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name sfinnovator
+```
+
+✅ Wrangler prints a `*.pages.dev` preview URL. Open it; verify the page, theme toggle,
+and (via `curl -sI <url>`) the security headers.
+
+### 1.7.3 Git-based auto-deploy (the "push = deploy" you liked)
+
+🧠 The durable setup connects the **GitHub repo** to Cloudflare Pages so every push
+builds & deploys — same as the Azure behaviour, no tokens in the repo.
+
+Steps (in the Cloudflare dashboard, after the repo is on GitHub):
+
+1. Workers & Pages → Create → Pages → **Connect to Git** → pick the repo.
+2. Build command: `npm run build` · Output dir: `dist` · Framework preset: **Astro**.
+3. Production branch: `main`. Every other branch → automatic **preview** deployment.
+4. Custom domain: add `sfinnovator.com` (later) → Cloudflare manages DNS + HTTPS.
+
+✅ Push to `main` → build runs → site live. Push a `feature/*` branch → unique preview URL.
+
+> **Note:** there is **no token/secret to store** with the Git integration — Cloudflare
+> pulls from GitHub directly. (The `npx wrangler pages deploy` path above is only for
+> manual rehearsal.)
+
+---
+
 ## Phase 2 — The blog (planned)
 
 > Not built yet. When we do it, this section gets the exact steps. Planned scope:

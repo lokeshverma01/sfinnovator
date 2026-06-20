@@ -45,8 +45,10 @@
 
 ### 2. Host security headers
 
-- **Where:** `public/staticwebapp.config.json` (ships to `dist/`).
-- **Headers:** `Strict-Transport-Security` (2y, includeSubDomains, preload),
+- **Where (primary, Cloudflare Pages):** `public/_headers` (ships to `dist/_headers`).
+- **Where (Azure SWA, kept for parity):** `public/staticwebapp.config.json`. Harmless on
+  Cloudflare, which ignores it.
+- **Headers (both):** `Strict-Transport-Security` (2y, includeSubDomains, preload),
   `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
   `Referrer-Policy: strict-origin-when-cross-origin`,
   `Permissions-Policy` (camera/mic/geo denied, `interest-cohort` off),
@@ -88,10 +90,10 @@ npm run build
 grep -o 'content-security-policy[^>]*' dist/index.html | head -c 300
 grep -c 'sha256-' dist/index.html          # expect > 0
 
-# Host config shipped:
-ls dist/staticwebapp.config.json
+# Host config shipped (Cloudflare primary; Azure kept for parity):
+ls dist/_headers dist/_redirects dist/staticwebapp.config.json
 
-# After deploy, confirm live headers:
+# After deploy, confirm live headers (use the *.pages.dev URL pre-domain):
 curl -sI https://sfinnovator.com | grep -iE 'strict-transport|x-frame|x-content-type|referrer-policy'
 ```
 
@@ -112,12 +114,13 @@ External audits (run after go-live):
 - [ ] `securityheaders.com` grade ≥ A.
 - [ ] 404 page works and doesn't leak internals.
 
-## Migration note (Azure → Cloudflare Pages)
+## Hosting note (Cloudflare Pages — primary)
 
-`staticwebapp.config.json` is **Azure-specific**. On Cloudflare Pages, the same headers
-go in a `public/_headers` file, and redirects in `public/_redirects`. The CSP (from
-Astro) is host-agnostic and carries over unchanged. Create `_headers` before flipping DNS;
-re-run the verification commands above against the Cloudflare preview URL.
+Cloudflare Pages is the chosen host. It reads `public/_headers` (security headers) and
+`public/_redirects` from the build output. The CSP (from Astro `<meta>`) is host-agnostic.
+`staticwebapp.config.json` is kept only for optional Azure parity and is ignored by
+Cloudflare. After deploy, re-run the verification commands above against the
+`*.pages.dev` preview URL, then again after the custom domain is attached.
 
 ## Future: when the portal + database arrive
 
