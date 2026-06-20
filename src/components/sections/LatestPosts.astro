@@ -1,0 +1,74 @@
+---
+/**
+ * LatestPosts — "Latest writing" list on the homepage.
+ * Queries the blog content collection, shows the most recent posts, and
+ * falls back to a tasteful empty state until the first post is published.
+ * Matches the approved mockup's post-row layout.
+ */
+import Container from '../ui/Container.astro';
+import { getCollection } from 'astro:content';
+import { BLOG_CATEGORIES } from '../../consts';
+
+const categoryLabel = (slug: string) => BLOG_CATEGORIES.find((c) => c.slug === slug)?.label ?? slug;
+
+const dateFmt = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: '2-digit',
+  year: 'numeric',
+});
+
+// Most recent 5 non-draft posts.
+const posts = (await getCollection('blog', ({ data }) => data.draft !== true))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
+  .slice(0, 5);
+---
+
+<section class="pt-4 pb-16">
+  <Container>
+    <div class="mb-7 flex items-end justify-between">
+      <div>
+        <h2 class="text-2xl font-bold tracking-[-0.02em]">Latest writing</h2>
+        <p class="mt-1 text-sm text-[var(--text-muted)]">Fresh from the workbench.</p>
+      </div>
+      <a href="/blog" class="text-[13.5px] font-medium whitespace-nowrap text-[var(--accent)]">
+        All posts →
+      </a>
+    </div>
+
+    {
+      posts.length === 0 ? (
+        <div class="rounded-[14px] border border-dashed border-[var(--border)] bg-[var(--bg-subtle)] px-6 py-12 text-center">
+          <p class="text-sm text-[var(--text-muted)]">
+            The first posts are on the way. Subscribe via{' '}
+            <a href="/rss.xml" class="font-medium text-[var(--accent)]">
+              RSS
+            </a>{' '}
+            to get them as they land.
+          </p>
+        </div>
+      ) : (
+        <div class="border-t border-[var(--border)]">
+          {posts.map((post) => (
+            <a
+              href={`/blog/${post.id}/`}
+              class="grid grid-cols-1 items-center gap-2 border-b border-[var(--border)] px-2 py-5 hover:bg-[var(--bg-subtle)] sm:grid-cols-[110px_1fr_auto] sm:gap-5"
+            >
+              <div class="font-mono text-[12.5px] text-[var(--text-muted)]">
+                {dateFmt.format(post.data.publishedAt)}
+                <br />
+                <span class="mt-1 inline-block rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--accent)]">
+                  {categoryLabel(post.data.category)}
+                </span>
+              </div>
+              <div>
+                <h3 class="text-[16.5px] font-semibold tracking-[-0.01em]">{post.data.title}</h3>
+                <p class="mt-0.5 text-[13.5px] text-[var(--text-muted)]">{post.data.description}</p>
+              </div>
+              <div class="hidden text-lg text-[var(--text-muted)] sm:block">→</div>
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </Container>
+</section>
