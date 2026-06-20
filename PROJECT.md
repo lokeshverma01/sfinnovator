@@ -27,15 +27,15 @@ rendering via a config flag).
 
 ## 3. Tech decisions
 
-| Decision     | Choice                | Why                                      |
-| ------------ | --------------------- | ---------------------------------------- |
-| Framework    | Astro 5               | Zero-JS by default → speed + SEO         |
-| Styling      | Tailwind CSS v4       | Utility-first, tiny output               |
-| Content      | MDX + Content Collections | Type-safe, version-controlled        |
-| Language     | TypeScript (strict)   | Maintainability                          |
-| Hosting now  | Azure Static Web Apps | Reuse existing setup/credits             |
-| Hosting later| Cloudflare Pages      | Durable free tier, no-egress storage     |
-| Theme        | CSS vars + inline JS  | Smooth dark/light, no flash              |
+| Decision      | Choice                    | Why                                  |
+| ------------- | ------------------------- | ------------------------------------ |
+| Framework     | Astro 6                   | Zero-JS by default → speed + SEO     |
+| Styling       | Tailwind CSS v4           | Utility-first, tiny output           |
+| Content       | MDX + Content Collections | Type-safe, version-controlled        |
+| Language      | TypeScript (strict)       | Maintainability                      |
+| Hosting now   | Azure Static Web Apps     | Reuse existing setup/credits         |
+| Hosting later | Cloudflare Pages          | Durable free tier, no-egress storage |
+| Theme         | CSS vars + inline JS      | Smooth dark/light, no flash          |
 
 ## 4. Folder map
 
@@ -56,18 +56,36 @@ src/
 
 ## 5. Roadmap
 
-| Phase | Goal                                   | Status        |
-| ----- | -------------------------------------- | ------------- |
-| 0     | Scaffold, git, deploy pipeline         | ✅ In progress |
-| 1     | Landing page (hero, features, theme)   | ✅ Built       |
-| 1b    | Connect Azure SWA + DNS + HTTPS        | ⬜ Your step   |
-| 2     | Blog: listing + post pages from MDX    | ⬜ Next        |
-| 2b    | SEO polish: per-post OG, Lighthouse 95+| ⬜             |
-| 3     | Portfolio page                         | ⬜             |
-| 4     | Migrate to Cloudflare Pages            | ⬜             |
-| 5     | Database (Neon) + CMS/portal           | ⬜ Future      |
-| 6     | Writer/Admin RBAC + approval workflow  | ⬜ Future      |
-| 7     | Media library (R2), search, analytics  | ⬜ Future      |
+| Phase | Goal                                    | Status       |
+| ----- | --------------------------------------- | ------------ |
+| 0     | Scaffold, git, deploy pipeline          | ✅ Done      |
+| 1     | Landing page (hero, features, theme)    | ✅ Built     |
+| 1.5   | Design finalisation (mockup → code)     | ✅ Done      |
+| 1.6   | Docs system + security baseline (CSP)   | ✅ Done      |
+| 1b    | Connect Azure SWA + DNS + HTTPS         | ⬜ Your step |
+| 2     | Blog: listing + post pages from MDX     | ⬜ Next      |
+| 2b    | SEO polish: per-post OG, Lighthouse 95+ | ⬜           |
+| 3     | Portfolio page                          | ⬜           |
+| 4     | Migrate to Cloudflare Pages             | ⬜           |
+| 5     | Database (Neon) + CMS/portal            | ⬜ Future    |
+| 6     | Writer/Admin RBAC + approval workflow   | ⬜ Future    |
+| 7     | Media library (R2), search, analytics   | ⬜ Future    |
+
+## 5b. Documentation system
+
+Living docs in [`docs/`](./docs/), updated in the same commit as the code:
+
+- `IMPLEMENTATION_GUIDE.md` — step-by-step rebuild journal
+- `COMPONENT_REFERENCE.md` — every file/component mapped
+- `TROUBLESHOOTING.md` — failure → file → fix runbook
+- `SECURITY.md` — posture + checklist
+- `CONVENTIONS.md` — coding/component standards
+
+## 5c. Security baseline
+
+- Strict **CSP** with build-time hashed inline scripts (no `unsafe-inline`) — `astro.config.mjs`
+- Host **security headers** (HSTS, frame-options, nosniff, referrer, permissions) — `public/staticwebapp.config.json`
+- Secrets gitignored; `npm audit` before deploys. Full detail in `docs/SECURITY.md`.
 
 ## 6. SEO checklist (baked in)
 
@@ -87,3 +105,6 @@ src/
 - **2026-06-20** — Accent color: Salesforce blue (#0176D3).
 - **2026-06-20** — Stay on Azure SWA now; migrate to Cloudflare Pages once the
   repo + first page are live.
+- **2026-06-20** — Upgraded Astro 5 → 6 to clear a high-severity XSS advisory; pinned
+  `vite@^7` via overrides to keep one Vite in the tree. Accepted a low, dev-only,
+  Windows-only esbuild advisory (see `docs/SECURITY.md`).

@@ -1,39 +1,39 @@
 ---
 /**
- * Header — logo/wordmark, primary nav, and the theme toggle.
- * Sticky, minimal, with a subtle bottom border.
+ * Header — logo badge + wordmark, primary nav, and the theme toggle.
+ * Sticky, translucent (blur), subtle bottom border. Matches the design mockup.
  */
 import Container from '../ui/Container.astro';
 import ThemeToggle from '../ui/ThemeToggle.astro';
 import { SITE, NAV_LINKS } from '../../consts';
 ---
 
-<header
-  class="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur"
->
+<header class="header-blur sticky top-0 z-50 border-b border-[var(--border)] backdrop-blur">
   <Container>
     <div class="flex h-16 items-center justify-between">
-      <!-- Wordmark -->
-      <a
-        href="/"
-        class="text-base font-semibold tracking-tight hover:text-[var(--color-accent)]"
-      >
-        {SITE.name}
+      <!-- Logo badge + wordmark -->
+      <a href="/" class="flex items-center gap-2.5 font-semibold tracking-tight">
+        <span
+          class="grid h-[26px] w-[26px] place-items-center rounded-[7px] bg-[var(--accent)] text-[12px] font-extrabold text-white"
+        >
+          SF
+        </span>
+        <span class="text-[15px]">{SITE.name}</span>
       </a>
 
       <!-- Nav + toggle -->
-      <nav class="flex items-center gap-1 sm:gap-2">
+      <nav class="flex items-center gap-1">
         {
           NAV_LINKS.map((link) => (
             <a
               href={link.href}
-              class="rounded-md px-3 py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-subtle)]"
+              class="rounded-lg px-3 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text)]"
             >
               {link.label}
             </a>
           ))
         }
-        <span class="ml-1"><ThemeToggle /></span>
+        <span class="ml-1.5"><ThemeToggle /></span>
       </nav>
     </div>
   </Container>

@@ -1,22 +1,25 @@
 ---
 /**
- * Features — three cards mapping to the three blog categories.
- * Driven by BLOG_CATEGORIES so it stays in sync with the rest of the site.
+ * Features — "What you'll find here": three category cards with icon tiles,
+ * soft shadow, and hover lift. Mirrors the approved mockup.
  */
 import Container from '../ui/Container.astro';
 
 const features = [
   {
+    icon: '📘',
     title: 'Implementations',
     href: '/blog/category/implementations',
     body: 'End-to-end builds of Salesforce out-of-the-box features, start to finish.',
   },
   {
+    icon: '🧩',
     title: 'Use Cases',
     href: '/blog/category/use-cases',
     body: 'Real business scenarios solved with Salesforce — the why and the how.',
   },
   {
+    icon: '🐞',
     title: 'Debugging',
     href: '/blog/category/debugging',
     body: 'Error scenarios, root-cause analysis, and the solutions that fixed them.',
@@ -24,19 +27,28 @@ const features = [
 ];
 ---
 
-<section class="pb-8">
+<section class="py-16">
   <Container>
-    <div class="grid gap-6 sm:grid-cols-3">
+    <div class="mb-7">
+      <h2 class="text-2xl font-bold tracking-[-0.02em]">What you'll find here</h2>
+      <p class="mt-1 text-sm text-[var(--text-muted)]">
+        Three kinds of writing, each grounded in real Salesforce work.
+      </p>
+    </div>
+
+    <div class="grid gap-[18px] sm:grid-cols-3">
       {
         features.map((f) => (
           <a
             href={f.href}
-            class="group rounded-xl border border-[var(--border)] bg-[var(--bg-subtle)] p-6 hover:border-[var(--color-accent)]"
+            class="card group rounded-[14px] border border-[var(--border)] bg-[var(--bg-card)] p-6 shadow-[var(--shadow)] transition-transform hover:-translate-y-[3px] hover:border-[var(--accent)]"
           >
-            <h2 class="text-base font-semibold group-hover:text-[var(--color-accent)]">
-              {f.title}
-            </h2>
-            <p class="mt-2 text-sm text-[var(--text-muted)]">{f.body}</p>
+            <div class="mb-4 grid h-10 w-10 place-items-center rounded-[10px] bg-[var(--accent-soft)] text-[19px]">
+              {f.icon}
+            </div>
+            <h3 class="text-base font-semibold tracking-[-0.01em]">{f.title}</h3>
+            <p class="mt-1.5 text-sm text-[var(--text-muted)]">{f.body}</p>
+            <div class="mt-4 text-[13px] font-medium text-[var(--accent)]">Explore →</div>
           </a>
         ))
       }

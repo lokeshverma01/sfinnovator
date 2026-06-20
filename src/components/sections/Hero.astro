@@ -1,33 +1,59 @@
 ---
 /**
- * Hero — the first thing visitors see. Clear headline, one-line value
- * proposition, and two primary calls to action. Intentionally text-first.
+ * Hero — eyebrow badge, headline with gradient accent phrase, subtle grid
+ * background, primary/secondary CTAs, and a metadata stat row.
+ * Matches the approved design mockup.
  */
 import Container from '../ui/Container.astro';
 ---
 
-<section class="py-24 sm:py-32">
-  <Container class="text-center">
-    <h1 class="mx-auto max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
-      Salesforce, explained well.
+<section class="relative overflow-hidden py-24 text-center sm:py-28">
+  <!-- subtle engineered grid, masked to fade at the edges (see .hero-grid) -->
+  <div class="hero-grid pointer-events-none absolute inset-0"></div>
+
+  <Container class="relative">
+    <span
+      class="mb-7 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-subtle)] px-3 py-1.5 text-[12.5px] text-[var(--text-muted)]"
+    >
+      <span class="h-1.5 w-1.5 rounded-full bg-[var(--accent)]"></span>
+      Salesforce, from hands-on work
+    </span>
+
+    <h1 class="mx-auto max-w-3xl text-4xl leading-[1.05] font-bold tracking-[-0.03em] sm:text-6xl">
+      Salesforce,
+      <span
+        class="bg-gradient-to-r from-[var(--accent)] to-[#6db8f5] bg-clip-text text-transparent"
+      >
+        explained well.
+      </span>
     </h1>
-    <p class="mx-auto mt-6 max-w-2xl text-lg text-[var(--text-muted)]">
-      Real implementations, use-case solutions, and debugging walkthroughs from
-      hands-on Salesforce work — written to be practical, not theoretical.
+
+    <p class="mx-auto mt-6 max-w-xl text-lg text-[var(--text-muted)]">
+      Real implementations, use-case solutions, and debugging walkthroughs — written to be
+      practical, not theoretical.
     </p>
-    <div class="mt-10 flex items-center justify-center gap-4">
+
+    <div class="mt-9 flex items-center justify-center gap-3">
       <a
         href="/blog"
-        class="rounded-md bg-[var(--color-accent)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2"
+        class="rounded-[10px] bg-[var(--accent)] px-5 py-2.5 text-[14.5px] font-medium text-white hover:bg-[var(--accent-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
       >
-        Read the blog
+        Read the blog →
       </a>
       <a
         href="/portfolio"
-        class="rounded-md border border-[var(--border)] px-5 py-2.5 text-sm font-medium hover:bg-[var(--bg-subtle)]"
+        class="rounded-[10px] border border-[var(--border)] px-5 py-2.5 text-[14.5px] font-medium hover:bg-[var(--bg-subtle)]"
       >
         View portfolio
       </a>
+    </div>
+
+    <div
+      class="mt-12 flex flex-wrap justify-center gap-x-9 gap-y-3 font-mono text-[13px] text-[var(--text-muted)]"
+    >
+      <span><b class="font-semibold text-[var(--text)]">OOTB</b> implementations</span>
+      <span><b class="font-semibold text-[var(--text)]">Real</b> use cases</span>
+      <span><b class="font-semibold text-[var(--text)]">Root-cause</b> debugging</span>
     </div>
   </Container>
 </section>
