@@ -36,4 +36,7 @@ See [`PROJECT.md`](./PROJECT.md) for the full architecture, roadmap, and folder 
 - `develop` → staging / integration
 - `feature/*` → one feature per branch, opened as a PR into `develop`
 
-Pushing to the deploy branch triggers an automatic build & deploy (CI/CD).
+**Host:** Cloudflare Pages (build `npm run build`, output `dist`). Connecting the GitHub
+repo to Cloudflare Pages gives push-to-deploy with per-branch previews — no secrets in the
+repo. Security headers live in `public/_headers`. See
+[`docs/IMPLEMENTATION_GUIDE.md`](./docs/IMPLEMENTATION_GUIDE.md) §Phase 1.7 for the steps.

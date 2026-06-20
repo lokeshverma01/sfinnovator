@@ -27,15 +27,15 @@ rendering via a config flag).
 
 ## 3. Tech decisions
 
-| Decision      | Choice                    | Why                                  |
-| ------------- | ------------------------- | ------------------------------------ |
-| Framework     | Astro 6                   | Zero-JS by default → speed + SEO     |
-| Styling       | Tailwind CSS v4           | Utility-first, tiny output           |
-| Content       | MDX + Content Collections | Type-safe, version-controlled        |
-| Language      | TypeScript (strict)       | Maintainability                      |
-| Hosting now   | Azure Static Web Apps     | Reuse existing setup/credits         |
-| Hosting later | Cloudflare Pages          | Durable free tier, no-egress storage |
-| Theme         | CSS vars + inline JS      | Smooth dark/light, no flash          |
+| Decision      | Choice                    | Why                                            |
+| ------------- | ------------------------- | ---------------------------------------------- |
+| Framework     | Astro 6                   | Zero-JS by default → speed + SEO               |
+| Styling       | Tailwind CSS v4           | Utility-first, tiny output                     |
+| Content       | MDX + Content Collections | Type-safe, version-controlled                  |
+| Language      | TypeScript (strict)       | Maintainability                                |
+| Hosting       | Cloudflare Pages          | Root-domain serving, free, previews            |
+| Hosting (alt) | Azure SWA (config kept)   | Parity only; `lokesh-portfolio` stays on Azure |
+| Theme         | CSS vars + inline JS      | Smooth dark/light, no flash                    |
 
 ## 4. Folder map
 
@@ -56,20 +56,20 @@ src/
 
 ## 5. Roadmap
 
-| Phase | Goal                                    | Status       |
-| ----- | --------------------------------------- | ------------ |
-| 0     | Scaffold, git, deploy pipeline          | ✅ Done      |
-| 1     | Landing page (hero, features, theme)    | ✅ Built     |
-| 1.5   | Design finalisation (mockup → code)     | ✅ Done      |
-| 1.6   | Docs system + security baseline (CSP)   | ✅ Done      |
-| 1b    | Connect Azure SWA + DNS + HTTPS         | ⬜ Your step |
-| 2     | Blog: listing + post pages from MDX     | ⬜ Next      |
-| 2b    | SEO polish: per-post OG, Lighthouse 95+ | ⬜           |
-| 3     | Portfolio page                          | ⬜           |
-| 4     | Migrate to Cloudflare Pages             | ⬜           |
-| 5     | Database (Neon) + CMS/portal            | ⬜ Future    |
-| 6     | Writer/Admin RBAC + approval workflow   | ⬜ Future    |
-| 7     | Media library (R2), search, analytics   | ⬜ Future    |
+| Phase | Goal                                     | Status       |
+| ----- | ---------------------------------------- | ------------ |
+| 0     | Scaffold, git, deploy pipeline           | ✅ Done      |
+| 1     | Landing page (hero, features, theme)     | ✅ Built     |
+| 1.5   | Design finalisation (mockup → code)      | ✅ Done      |
+| 1.6   | Docs system + security baseline (CSP)    | ✅ Done      |
+| 1.7   | Cloudflare Pages config (\_headers etc.) | ✅ Done      |
+| 1b    | Push to GitHub + connect Cloudflare Git  | ⬜ Your step |
+| 2     | Blog: listing + post pages from MDX      | ⬜ Next      |
+| 2b    | SEO polish: per-post OG, Lighthouse 95+  | ⬜           |
+| 3     | Portfolio page                           | ⬜           |
+| 5     | Database (Neon) + CMS/portal             | ⬜ Future    |
+| 6     | Writer/Admin RBAC + approval workflow    | ⬜ Future    |
+| 7     | Media library (R2), search, analytics    | ⬜ Future    |
 
 ## 5b. Documentation system
 
@@ -84,7 +84,7 @@ Living docs in [`docs/`](./docs/), updated in the same commit as the code:
 ## 5c. Security baseline
 
 - Strict **CSP** with build-time hashed inline scripts (no `unsafe-inline`) — `astro.config.mjs`
-- Host **security headers** (HSTS, frame-options, nosniff, referrer, permissions) — `public/staticwebapp.config.json`
+- Host **security headers** (HSTS, frame-options, nosniff, referrer, permissions) — `public/_headers` (Cloudflare) + `public/staticwebapp.config.json` (Azure parity)
 - Secrets gitignored; `npm audit` before deploys. Full detail in `docs/SECURITY.md`.
 
 ## 6. SEO checklist (baked in)
@@ -108,3 +108,8 @@ Living docs in [`docs/`](./docs/), updated in the same commit as the code:
 - **2026-06-20** — Upgraded Astro 5 → 6 to clear a high-severity XSS advisory; pinned
   `vite@^7` via overrides to keep one Vite in the tree. Accepted a low, dev-only,
   Windows-only esbuild advisory (see `docs/SECURITY.md`).
+- **2026-06-20** — Chose **Cloudflare Pages** as the host for `claudeterminal` (root-domain
+  serving, free, per-branch previews). Added `public/_headers` + `_redirects`; kept the
+  Azure config for parity. Existing `lokesh-portfolio` (Azure CI/CD) left untouched. A
+  separate near-duplicate repo `sfinnovator-extension` exists on GitHub but we proceed with
+  `claudeterminal`.
