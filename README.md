@@ -6,13 +6,13 @@ Cloudflare Pages (later) with zero code changes.
 
 ## Tech stack
 
-| Layer    | Choice                          |
-| -------- | ------------------------------- |
-| Framework| Astro 5 (static output)         |
-| Styling  | Tailwind CSS v4                 |
-| Content  | MDX via Astro Content Collections |
-| Language | TypeScript (strict)             |
-| SEO      | Sitemap, RSS, OG, JSON-LD       |
+| Layer     | Choice                            |
+| --------- | --------------------------------- |
+| Framework | Astro 6 (static output)           |
+| Styling   | Tailwind CSS v4                   |
+| Content   | MDX via Astro Content Collections |
+| Language  | TypeScript (strict)               |
+| SEO       | Sitemap, RSS, OG, JSON-LD         |
 
 ## Local development
 
