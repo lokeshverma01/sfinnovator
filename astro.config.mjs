@@ -6,6 +6,8 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { PREPAINT_THEME_SCRIPT } from './src/lib/themeScript.mjs';
 
+import cloudflare from '@astrojs/cloudflare';
+
 // Compute the CSP hash for our one unavoidable inline script (the no-flash
 // theme bootstrap). Derived from the SAME string the layout renders, so the
 // hash can never drift from the script. Astro auto-hashes all OTHER (bundled)
@@ -63,4 +65,6 @@ export default defineConfig({
       },
     },
   },
+
+  adapter: cloudflare(),
 });
