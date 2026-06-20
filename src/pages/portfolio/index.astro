@@ -1,17 +1,43 @@
 ---
 /**
- * /portfolio — project showcase. SKELETON for now.
- * Phase 3 will render your Salesforce solutions with live links/embeds.
+ * /portfolio — author intro + grid of solution cards.
+ * Cards come from the portfolio collection (auto-updates when you add a file).
+ * No pagination yet (solutions are few); add later if the list grows large.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Container from '../../components/ui/Container.astro';
+import AuthorIntro from '../../components/portfolio/AuthorIntro.astro';
+import PortfolioCard from '../../components/portfolio/PortfolioCard.astro';
+import { getPublishedSolutions } from '../../lib/portfolio';
+
+const solutions = await getPublishedSolutions();
 ---
 
-<BaseLayout title="Portfolio" description="Salesforce solutions you can view, use, and validate.">
-  <Container class="py-24">
-    <h1 class="text-3xl font-bold tracking-tight">Portfolio</h1>
-    <p class="mt-4 text-[var(--text-muted)]">
-      Selected Salesforce builds will appear here — viewable and verifiable.
-    </p>
+<BaseLayout
+  title="Portfolio"
+  description="Salesforce solutions you can view, use, and validate — real, working builds."
+>
+  <Container class="max-w-5xl">
+    <AuthorIntro />
+
+    <div
+      class="mt-11 mb-1 text-[13px] font-bold tracking-[0.07em] text-[var(--text-muted)] uppercase"
+    >
+      Solutions
+    </div>
+
+    {
+      solutions.length === 0 ? (
+        <div class="my-6 rounded-[14px] border border-dashed border-[var(--border)] bg-[var(--bg-subtle)] px-6 py-16 text-center">
+          <p class="text-sm text-[var(--text-muted)]">Projects are on the way.</p>
+        </div>
+      ) : (
+        <div class="my-4 grid gap-5 sm:grid-cols-2">
+          {solutions.map((solution) => (
+            <PortfolioCard solution={solution} />
+          ))}
+        </div>
+      )
+    }
   </Container>
 </BaseLayout>

@@ -165,6 +165,28 @@ button,
   color: var(--c-investigating);
   background: var(--c-investigating-bg);
 }
+/* Portfolio status → reuse the same colour tokens (CSP-safe classes). */
+.badge-shipped {
+  color: var(--c-solved);
+  background: var(--c-solved-bg);
+}
+.badge-in-progress {
+  color: var(--c-workaround);
+  background: var(--c-workaround-bg);
+}
+.badge-concept {
+  color: var(--c-investigating);
+  background: var(--c-investigating-bg);
+}
+
+/*
+ * Portfolio thumbnail fallback — soft accent gradient behind project initials,
+ * used when a solution has no `image`. Class-based (no inline styles) for CSP.
+ */
+.thumb-fallback {
+  background:
+    radial-gradient(circle at 30% 30%, var(--accent-soft), transparent 70%), var(--bg-subtle);
+}
 
 /*
  * Callout boxes (the auto-rendered structured frontmatter fields).

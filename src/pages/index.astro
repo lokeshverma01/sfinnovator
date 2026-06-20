@@ -1,16 +1,18 @@
 ---
 /**
- * Landing page (/) — composes Hero, Features, and LatestPosts inside the
- * BaseLayout shell. SEO uses the site defaults (no props needed).
+ * Landing page (/) — composes Hero, Features, LatestPosts, and FeaturedWork
+ * inside the BaseLayout shell. SEO uses the site defaults (no props needed).
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
 import Features from '../components/sections/Features.astro';
 import LatestPosts from '../components/sections/LatestPosts.astro';
+import FeaturedWork from '../components/sections/FeaturedWork.astro';
 ---
 
 <BaseLayout>
   <Hero />
   <Features />
   <LatestPosts />
+  <FeaturedWork />
 </BaseLayout>
