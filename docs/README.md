@@ -6,6 +6,7 @@ describes. Start here:
 | Document                                             | What it's for                                                         |
 | ---------------------------------------------------- | --------------------------------------------------------------------- |
 | **[AUTHORING.md](./AUTHORING.md)**                   | **No-code publishing: add a post/solution by filling one file.**      |
+| [EDITING_GUIDE.md](./EDITING_GUIDE.md)               | Page-first: "I see X on the page — which file is it & how do I edit?" |
 | [DEV_SETUP.md](./DEV_SETUP.md)                       | Connect VS Code to GitHub, edit locally, preview, push to deploy.     |
 | [templates/](./templates/)                           | Copy-paste starters: each blog post type, portfolio solution, series. |
 | [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) | Step-by-step build journal. Follow it to rebuild the site from zero.  |

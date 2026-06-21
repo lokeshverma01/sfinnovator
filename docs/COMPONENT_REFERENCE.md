@@ -4,8 +4,11 @@
 > exposes. Use this when you need to find where something lives or understand what a
 > change will ripple into. Pair with [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md) when
 > something breaks.
+>
+> **Looking at the live page and want to edit a specific element** (the navbar, the hero
+> headline, a button)? Start with the page-first [`EDITING_GUIDE.md`](./EDITING_GUIDE.md).
 
-Last verified against the codebase: **Phase 1.6**.
+Last verified against the codebase: **Phase 2 (blog + portfolio + series + search)**.
 
 ---
 
@@ -13,57 +16,51 @@ Last verified against the codebase: **Phase 1.6**.
 
 ```
 claudeterminal/
-├── astro.config.mjs              # Astro config: site URL, static output, integrations, CSP
-├── tsconfig.json                 # strict TS + path aliases (@/, @components/, …)
-├── package.json                  # deps + scripts (dev/build/preview/format/lint)
-├── .prettierrc                   # formatting rules (+ astro & tailwind plugins)
-├── .gitignore
+├── astro.config.mjs              # site URL, static output, integrations, markdown(prism), CSP
+├── wrangler.jsonc                # Cloudflare deploy config (assets → dist)
+├── package.json                  # deps + scripts (build runs astro + pagefind)
 │
 ├── public/                       # served as-is (NOT processed by the build)
-│   ├── favicon.svg
-│   ├── robots.txt                # crawler rules + sitemap pointer
-│   ├── staticwebapp.config.json  # Azure SWA: security headers, caching, 404
-│   └── images/                   # og-default.png (add), logos, etc.
+│   ├── favicon.svg · robots.txt
+│   ├── _headers · _redirects     # Cloudflare security headers / redirects
+│   ├── staticwebapp.config.json  # Azure SWA parity (ignored by Cloudflare)
+│   └── images/                   # og-default.png, screenshots, etc.
 │
 ├── src/
-│   ├── consts.ts                 # SITE, NAV_LINKS, SOCIAL_LINKS, BLOG_CATEGORIES
-│   ├── content.config.ts         # blog collection schema (frontmatter validation)
+│   ├── consts.ts                 # SITE, AUTHOR, NAV_LINKS, SOCIAL_LINKS, POST_TYPES,
+│   │                             #   POST_STATUSES, DIFFICULTY_LEVELS, POSTS_PER_PAGE
+│   ├── content.config.ts         # blog + portfolio + series collection schemas
 │   │
-│   ├── lib/
-│   │   ├── seo.ts                # buildSeo() — central meta builder
-│   │   └── themeScript.mjs       # the is:inline theme bootstrap (shared w/ CSP hash)
-│   │
-│   ├── styles/
-│   │   └── global.css            # Tailwind import + theme tokens (light/.dark)
-│   │
-│   ├── layouts/
-│   │   └── BaseLayout.astro       # page shell: <head> SEO, theme bootstrap, header/footer
+│   ├── lib/                      # posts.ts, portfolio.ts, series.ts (queries+visibility),
+│   │                             #   seo.ts, readingTime.ts, solution.ts, themeScript.mjs
+│   ├── styles/                   # global.css (tokens, badges, callouts, prose), prism.css
+│   ├── layouts/                  # BaseLayout, BlogListing, BlogPost
 │   │
 │   ├── components/
-│   │   ├── ui/
-│   │   │   ├── Container.astro     # max-width + responsive padding wrapper
-│   │   │   └── ThemeToggle.astro   # light/dark button + persistence
-│   │   ├── layout/
-│   │   │   ├── Header.astro        # logo badge, nav, toggle
-│   │   │   └── Footer.astro        # copyright + social links
-│   │   └── sections/
-│   │       ├── Hero.astro          # headline, CTAs, grid bg, stat row
-│   │       ├── Features.astro      # 3 category cards
-│   │       └── LatestPosts.astro   # recent posts list + empty state
+│   │   ├── ui/                   # Container, ThemeToggle
+│   │   ├── layout/               # Header, Footer
+│   │   ├── sections/             # Hero, Features, LatestPosts, FeaturedWork (homepage)
+│   │   ├── blog/                 # Badge, Callout, PostMeta, PostCard, FilterTabs,
+│   │   │                         #   Pagination, SearchBox, SeriesBox, TableOfContents
+│   │   └── portfolio/            # AuthorIntro, PortfolioCard
 │   │
-│   ├── content/
-│   │   └── blog/                   # blog posts (.mdx) — empty for now (.gitkeep)
+│   ├── content/                  # YOUR CONTENT (.mdx)
+│   │   ├── blog/                 # blog posts
+│   │   ├── portfolio/            # portfolio solutions
+│   │   └── series/               # series definitions
 │   │
-│   └── pages/                      # FILE = ROUTE
-│       ├── index.astro             # /            landing page
-│       ├── 404.astro               # /404         not found
-│       ├── rss.xml.ts              # /rss.xml     RSS feed
-│       ├── blog/index.astro        # /blog        listing (skeleton)
-│       └── portfolio/index.astro   # /portfolio   showcase (skeleton)
+│   └── pages/                    # FILE = ROUTE
+│       ├── index.astro                         # /
+│       ├── 404.astro · rss.xml.ts
+│       ├── blog/[...page].astro                # /blog, /blog/2 …
+│       ├── blog/[...slug].astro                # /blog/<post>
+│       ├── blog/category/[type]/[...page].astro# /blog/category/<type>
+│       ├── blog/series/index.astro             # /blog/series
+│       ├── blog/series/[slug].astro            # /blog/series/<name>
+│       └── portfolio/index.astro · [...slug].astro
 │
-├── docs/                           # ← living documentation (this folder)
-└── design/
-    └── mockup.html                 # approved visual reference
+├── docs/                         # ← living documentation (incl. templates/)
+└── design/                       # approved HTML mockups (reference)
 ```
 
 ---
@@ -123,6 +120,8 @@ Each entry: **Path · Purpose · Props · Depends on · Used by · Notes.**
 - **Purpose:** Landing hero — eyebrow pill, headline w/ gradient phrase, masked grid
   background, two CTAs, stat row.
 - **Depends on:** `Container`, theme tokens (`global.css`).
+- **Edit:** the headline **"Salesforce, explained well."**, subtext, buttons, and stat row
+  are hardcoded here (this is the homepage hero copy). See EDITING_GUIDE.md → Home page.
 
 ### `Features.astro`
 
@@ -134,10 +133,96 @@ Each entry: **Path · Purpose · Props · Depends on · Used by · Notes.**
 ### `LatestPosts.astro`
 
 - **Path:** `src/components/sections/LatestPosts.astro`
-- **Purpose:** Lists the 5 most recent non-draft posts; shows an empty-state card when
+- **Purpose:** Lists the 5 most recent published posts; shows an empty-state card when
   there are none.
-- **Depends on:** `astro:content` (`getCollection('blog')`), `consts.ts` (category labels).
-- **Notes:** sorts by `publishedAt` desc; links use `post.id` (Astro 5 glob-loader id).
+- **Depends on:** `lib/posts.ts` (`getPublishedPosts`), `consts.ts` (`postType`).
+
+### `FeaturedWork.astro`
+
+- **Path:** `src/components/sections/FeaturedWork.astro`
+- **Purpose:** Homepage 3-tile strip of `featured` portfolio solutions; renders nothing if
+  none are featured.
+- **Depends on:** `lib/portfolio.ts` (`getFeaturedSolutions`), `lib/solution.ts` (`initialsOf`).
+
+---
+
+## Blog components (`src/components/blog/`)
+
+### `Badge.astro`
+
+- **Purpose:** Pill for a post type or status. Colour via class-based `.badge-*` variants
+  (CSP-safe). Props: `variant`, `label`, `dot?`.
+
+### `Callout.astro`
+
+- **Purpose:** Labeled colored box for a structured frontmatter field (Symptom, Root cause,
+  Resolution, Objective, Prerequisites, Scenario…). Props: `kind`, `label`, `icon?`,
+  `text?` (or slotted content).
+
+### `PostMeta.astro`
+
+- **Purpose:** The metadata row under a post title: published/updated dates, reading time,
+  difficulty. Props: `publishedAt`, `updatedAt?`, `readingTime`, `difficulty?`.
+
+### `PostCard.astro`
+
+- **Purpose:** A post's card in any listing (blog, category, homepage). Type/status badges,
+  title, excerpt, date, reading time, tags. Prop: `post`.
+
+### `FilterTabs.astro`
+
+- **Purpose:** "All / Implementation / Use Case / Debugging" pills linking to the listing +
+  category pages. Driven by `POST_TYPES`. Prop: `active?`.
+
+### `Pagination.astro`
+
+- **Purpose:** Prev / numbered / next controls for `/blog` and category pages. Props:
+  `currentPage`, `lastPage`, `baseUrl`.
+
+### `SearchBox.astro`
+
+- **Purpose:** Mounts the Pagefind static-search UI on `#search`. Loads `/pagefind/*` (built
+  by the `pagefind` step). Works in build/preview/prod, not `dev`. (🔴 leave wiring alone.)
+
+### `SeriesBox.astro`
+
+- **Purpose:** In-post series nav: "Part X of N" + ordered outline (current highlighted) +
+  link to the series. Prop: `ctx` (from `lib/series.ts`). `N` = published + `upcoming`.
+
+### `TableOfContents.astro`
+
+- **Purpose:** Sticky "On this page" built from the post's H2/H3; scroll-spy highlights the
+  active section. Prop: `headings` (Astro `MarkdownHeading[]`).
+
+---
+
+## Portfolio components (`src/components/portfolio/`)
+
+### `AuthorIntro.astro`
+
+- **Purpose:** The /portfolio header — avatar (photo or initials), name, role, bio, links.
+  All content from `AUTHOR` in `consts.ts`.
+
+### `PortfolioCard.astro`
+
+- **Purpose:** A solution tile: thumbnail (image or initials), status badge, title, summary,
+  tech badges, and only-the-actions-that-exist links. Prop: `solution`.
+
+---
+
+## Layouts (`src/layouts/`)
+
+### `BlogListing.astro`
+
+- **Purpose:** Shared shell for `/blog` and category pages — heading, search box, filter
+  tabs, post cards, pagination. Props: `title`, `subtitle`, `posts`, `activeType?`,
+  pagination props.
+
+### `BlogPost.astro`
+
+- **Purpose:** The single, consistent post template — badges, meta, series box, auto
+  callouts (by type), the MDX body, tags, prev/next, TOC. Props: `data`, `headings`,
+  `body?`, `seriesCtx?`.
 
 ---
 
@@ -145,9 +230,10 @@ Each entry: **Path · Purpose · Props · Depends on · Used by · Notes.**
 
 ### `consts.ts`
 
-- **Exposes:** `SITE` (name, title, description, url, ogImage, author, locale),
-  `NAV_LINKS`, `SOCIAL_LINKS`, `BLOG_CATEGORIES`.
-- **Rule:** branding/nav/categories change **here only**.
+- **Exposes:** `SITE` (name/title/description/url/ogImage/author/locale), `AUTHOR`
+  (portfolio intro), `NAV_LINKS`, `SOCIAL_LINKS`, `POST_TYPES` (+ `postType()`),
+  `POST_STATUSES`, `DIFFICULTY_LEVELS`, `POSTS_PER_PAGE`.
+- **Rule:** branding, nav, author intro, post types/statuses change **here only**.
 
 ### `lib/seo.ts`
 
@@ -165,9 +251,21 @@ Each entry: **Path · Purpose · Props · Depends on · Used by · Notes.**
 
 ### `content.config.ts`
 
-- **Defines:** the `blog` collection + Zod schema (title, description, category,
-  publishedAt, updatedAt?, draft, tags, image?).
+- **Defines:** three collections — `blog` (discriminated union by `type`:
+  implementation/use-case/debugging, with per-type fields + `published`, `series`,
+  `seriesOrder`), `portfolio` (solutions), and `series`.
 - **Effect:** invalid frontmatter **fails the build** — bad data never ships.
+
+### `lib/posts.ts` · `lib/portfolio.ts` · `lib/series.ts`
+
+- **Purpose:** central query helpers enforcing the `published` rule + ordering.
+  `getPublishedPosts`, `getPublishedSolutions`/`getFeaturedSolutions`,
+  `getSeriesList`/`getSeries`/`getSeriesPosts`/`getSeriesContext`.
+
+### `lib/readingTime.ts` · `lib/solution.ts`
+
+- **Purpose:** small presentation helpers — reading-time estimate; solution status badge,
+  action-link list, and title initials.
 
 ### `astro.config.mjs`
 
