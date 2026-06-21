@@ -1,0 +1,49 @@
+---
+# ── DEBUGGING POST ─────────────────────────────────────────────────────────
+# Copy this whole file into src/content/blog/your-post-slug.mdx and fill it in.
+# The file NAME becomes the URL: src/content/blog/soql-101.mdx → /blog/soql-101
+# Lines starting with # are comments — they are ignored, you can delete them.
+
+type: debugging # ← do NOT change (this picks the debugging template)
+title: 'This blog is a test debugging blog manually added' # ← the post title (also the H1 + SEO title)
+description: 'Adding a test description for this test manual deploy blog' # ← 1–2 line summary (shown on cards + Google). Keep < 160 chars.
+
+# Structured fields — these render as the colored callout boxes automatically.
+symptom: '404 not found' # ← the exact error / what the user sees   (REQUIRED)
+environment: 'Custom Domain' # ← where it happens (optional) e.g. "Apex trigger, bulk DML"
+status: solved # ← solved | workaround | investigating
+rootCause: "The error 404 not found means the endpoint that you are trying to access doesn't exist. You need to check if the current path which we are trying to access is available or not." # ← why it happens (optional)
+resolution: 'Update the endpoint to a current page avaialble in your system' # ← the fix (optional — shown as the green box at the end)
+
+# Metadata
+publishedAt: 2026-01-01 # ← publish date (YYYY-MM-DD). Use today's date.
+# updatedAt: 2026-01-15      # ← OPTIONAL: uncomment when you revise the post
+difficulty: Intermediate # ← Beginner | Intermediate | Advanced (optional, or delete)
+tags: [Custom Domain, Sites] # ← topic tags (optional)
+featured: false # ← true = pin to the homepage
+published: true # ← false = keep private (no page, not listed). Flip to publish.
+---
+
+## What the error means
+
+As explained above the error means the page that you are trying to access doesn't exist.
+
+## Reproducing it
+
+1. Step one
+2. Step two
+
+```apex
+// code blocks get syntax highlighting + a dark theme automatically
+List<Account> a = [SELECT Id FROM Account];
+```
+
+## The fix
+
+Explain the fix. The `resolution:` field above renders as a green summary box;
+use this section for the detailed walkthrough.
+
+## Key takeaways
+
+- Point one
+- Point two
