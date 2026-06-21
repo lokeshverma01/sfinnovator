@@ -12,6 +12,16 @@
   // use). For a static site, an assets-only config is correct.
   "name": "sfinnovator",
   "compatibility_date": "2026-06-20",
+  // Retire the default production *.workers.dev URL now that sfinnovator.com is
+  // the live custom domain — avoids a duplicate, indexable address (Cloudflare's
+  // own recommendation for production). Reversible: remove these lines + redeploy.
+  //
+  // IMPORTANT: workers_dev:false ALSO disables per-branch preview URLs by
+  // default — which would break the feature→preview→PR workflow. So we keep
+  // preview_urls:true explicitly to retire ONLY the production workers.dev URL
+  // while preserving branch previews.
+  "workers_dev": false,
+  "preview_urls": true,
   "assets": {
     "directory": "./dist",
   },
