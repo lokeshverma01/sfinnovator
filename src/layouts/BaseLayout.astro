@@ -16,16 +16,8 @@ import { PREPAINT_THEME_SCRIPT } from '../lib/themeScript.mjs';
 type Props = SeoInput;
 
 const seo = buildSeo({ ...Astro.props, pathname: Astro.url.pathname });
-
-// JSON-LD structured data helps search engines understand the site.
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': seo.type === 'article' ? 'Article' : 'WebSite',
-  name: SITE.name,
-  url: seo.canonical,
-  description: seo.description,
-  author: { '@type': 'Person', name: SITE.author },
-};
+// Rich JSON-LD graph (BlogPosting/WebSite + optional BreadcrumbList) from seo.ts.
+const jsonLd = seo.jsonLd;
 ---
 
 <!doctype html>
@@ -49,6 +41,19 @@ const jsonLd = {
     <meta property="og:url" content={seo.canonical} />
     <meta property="og:image" content={seo.image} />
     <meta property="og:site_name" content={SITE.name} />
+
+    <!-- Article-specific OG (only on posts) -->
+    {
+      seo.type === 'article' && (
+        <>
+          {seo.publishedTime && (
+            <meta property="article:published_time" content={seo.publishedTime} />
+          )}
+          {seo.modifiedTime && <meta property="article:modified_time" content={seo.modifiedTime} />}
+          <meta property="article:author" content={seo.author} />
+        </>
+      )
+    }
 
     <!-- Twitter / X card -->
     <meta name="twitter:card" content="summary_large_image" />

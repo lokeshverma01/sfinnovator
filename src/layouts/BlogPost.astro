@@ -49,9 +49,26 @@ const statusVariant =
       : 'solved';
 
 const mins = readingTime(body);
+
+// SEO: ISO dates + breadcrumb trail for structured data.
+const publishedTime = data.publishedAt instanceof Date ? data.publishedAt.toISOString() : undefined;
+const modifiedTime = data.updatedAt instanceof Date ? data.updatedAt.toISOString() : undefined;
+const breadcrumbs = [
+  { name: 'Blog', path: '/blog' },
+  ...(type ? [{ name: type.label, path: `/blog/category/${type.slug}` }] : []),
+  { name: data.title, path: Astro.url.pathname },
+];
 ---
 
-<BaseLayout title={data.title} description={data.description} image={data.image} type="article">
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  image={data.image}
+  type="article"
+  publishedTime={publishedTime}
+  modifiedTime={modifiedTime}
+  breadcrumbs={breadcrumbs}
+>
   <Container class="max-w-3xl" data-pagefind-body>
     <!-- Hero -->
     <div class="pt-10">
