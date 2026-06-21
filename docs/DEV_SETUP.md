@@ -89,6 +89,8 @@ To add a new blog post:
    (Full field reference: [AUTHORING.md](./AUTHORING.md).)
 
 Portfolio item? Same idea in `src/content/portfolio/` using `templates/portfolio-solution.mdx`.
+Series? Create `src/content/series/<slug>.mdx` from `templates/series.mdx`, then add
+`series: <slug>` + `seriesOrder: N` to each post. Full details in [AUTHORING.md](./AUTHORING.md).
 
 ### Step 3 — Preview it locally (optional but recommended)
 

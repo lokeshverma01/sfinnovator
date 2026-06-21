@@ -14,10 +14,11 @@
 3. Fill in the fields, write your content.
 4. Commit to `main` (or open a PR). Cloudflare rebuilds → it's **live in ~1–2 minutes**.
 
-| To publish a…  | Put the file in…         | It becomes…              |
-| -------------- | ------------------------ | ------------------------ |
-| Blog post      | `src/content/blog/`      | `/blog/<file-name>`      |
-| Portfolio item | `src/content/portfolio/` | `/portfolio/<file-name>` |
+| To publish a…  | Put the file in…         | It becomes…                |
+| -------------- | ------------------------ | -------------------------- |
+| Blog post      | `src/content/blog/`      | `/blog/<file-name>`        |
+| Portfolio item | `src/content/portfolio/` | `/portfolio/<file-name>`   |
+| Series         | `src/content/series/`    | `/blog/series/<file-name>` |
 
 The **file name is the URL**. `src/content/blog/soql-101.mdx` → `sfinnovator.com/blog/soql-101`.
 Use lowercase words with hyphens, no spaces.
