@@ -12,12 +12,18 @@ import Footer from '../components/layout/Footer.astro';
 import { buildSeo, type SeoInput } from '../lib/seo';
 import { SITE } from '../consts';
 import { PREPAINT_THEME_SCRIPT } from '../lib/themeScript.mjs';
+import { isIndexable } from '../lib/env';
 
 type Props = SeoInput;
 
 const seo = buildSeo({ ...Astro.props, pathname: Astro.url.pathname });
 // Rich JSON-LD graph (BlogPosting/WebSite + optional BreadcrumbList) from seo.ts.
 const jsonLd = seo.jsonLd;
+
+// Search-engine indexing is AUTOMATIC by environment (see lib/env.ts):
+// only production (SEO_INDEX=true) is indexable; previews/local are noindex.
+// A page can still force noindex via its `noindex` prop (e.g. the 404 page).
+const noindex = seo.noindex || !isIndexable();
 ---
 
 <!doctype html>
@@ -32,7 +38,7 @@ const jsonLd = seo.jsonLd;
     <title>{seo.title}</title>
     <meta name="description" content={seo.description} />
     <link rel="canonical" href={seo.canonical} />
-    {seo.noindex && <meta name="robots" content="noindex, nofollow" />}
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <!-- Open Graph (Facebook, LinkedIn, Slack previews) -->
     <meta property="og:type" content={seo.type} />
