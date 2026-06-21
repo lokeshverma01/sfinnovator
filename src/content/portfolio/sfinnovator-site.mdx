@@ -1,0 +1,104 @@
+---
+title: Building SF Innovator — a fast, serverless Salesforce blog
+summary: How I designed and built this site — the reasoning, the architecture, the technology choices, and how each one keeps it fast, secure, and future-proof.
+tagline: The story behind the site you're reading — why it exists, how it's built, and what makes it last.
+status: shipped
+tech: [Astro, TypeScript, Tailwind CSS, MDX, Cloudflare, Pagefind]
+useUrl: https://sfinnovator.com
+repoUrl: https://github.com/lokeshverma01/sfinnovator
+role: Architect & Builder
+completedAt: 2026-06-21
+order: 1
+featured: true
+published: true
+---
+
+## Why this site exists
+
+I write about Salesforce. I needed somewhere to put that writing — and I had a choice to
+make.
+
+I could have reached for a ready-made platform and started typing. Most people do. But a
+hosted CMS meant a monthly bill, a database I didn't need, a pile of JavaScript slowing
+every page, and someone else's idea of how publishing should feel. None of that matched
+what I actually wanted.
+
+So I set my own brief: a site that loads almost instantly, ranks well because it's built
+well, defends itself by design, costs no more than the domain — and lets me publish by
+writing a single file. Then I built exactly that. The site is in my portfolio because it's
+the clearest example of how I approach a problem: understand it, choose deliberately, and
+engineer for the long run.
+
+## The architecture, in plain terms
+
+The whole design rests on one decision: **build every page ahead of time, not on demand.**
+
+When you open a normal site, a server wakes up, queries a database, assembles a page, and
+sends it back — every single visit. This site skips all of that. Every page is generated
+**once**, at build time, into finished HTML, and served straight from servers near you.
+There's nothing to compute when you arrive. The page already exists.
+
+That one choice cascades into everything good about the site: it's fast because there's no
+work to do, secure because there's no server or database to attack, and nearly free
+because there's nothing running when no one's reading.
+
+## The technology — and why each piece is here
+
+I didn't pick these for fashion. Each one earns its place.
+
+**Astro — the framework.** It generates the static HTML and, crucially, ships _zero
+JavaScript by default_. Most frameworks send a heavy bundle to every visitor; Astro sends
+clean HTML and adds script only where it's genuinely needed. That's the single biggest
+reason pages feel instant.
+
+**Markdown / MDX — the content.** Every post and project is a plain text file, not a
+database row. I write in Markdown, commit it, and a type-checked build turns it into a
+page — catching mistakes before they can ever go live. The content lives in version
+control alongside the code, fully history-tracked.
+
+**TypeScript — the safety net.** Every content file is validated against a strict schema
+at build time. A missing field or a wrong date fails the build instead of shipping a
+broken page. The site can't quietly break.
+
+**Tailwind CSS — the styling.** A small, consistent design system with a single source of
+truth for colour and spacing — which is what makes the dark/light theme switch instantly
+and the whole site feel like one coherent thing.
+
+**Cloudflare — the hosting.** The finished site is served from a global edge network, and
+it redeploys automatically every time I push a change. No servers to manage, generous free
+tier, HTTPS handled for me.
+
+**Pagefind — the search.** Full-text search that builds its index at deploy time and runs
+entirely in the visitor's browser. Real search, with no server answering behind it.
+
+## Built to last
+
+The hard test of architecture isn't how it launches — it's how it grows.
+
+**Publishing won't change as I scale.** Adding content is writing one file with a
+fill-in-the-blanks template and a single `published` switch. That works the same whether
+the site has five posts or five hundred — and a future collaborator could publish through a
+reviewed pull request without ever touching code.
+
+**SEO looks after itself.** Clean semantic HTML, canonical URLs, social cards, and rich
+structured data are generated on every page automatically. Production indexes; drafts and
+previews never do — the site decides by environment, so unfinished work can't leak into
+search. I write a good title; the machine handles the rest.
+
+**Security is a foundation, not a patch.** A strict Content Security Policy with no
+`unsafe-inline`, locked-down response headers, and the simple fact that a static site has
+almost no surface to attack.
+
+**Nothing is locked in.** It's plain files, open standards, and a public repository. The
+content would move to any host tomorrow; the whole project can be rebuilt from its own
+documentation.
+
+## See for yourself
+
+- **Use it** — you already are. Read the blog, browse the portfolio, try the search, switch
+  to dark mode.
+- **Read the source** — the entire project is open on GitHub, including docs that map every
+  component and explain how to rebuild it from scratch.
+
+Fast, secure, future-proof, and mine to publish to with a single file. That was the brief —
+and it's the site you're on.
