@@ -93,6 +93,53 @@ out. Nothing per-post to configure beyond a good `title` + `description`.
 
 ---
 
+## Indexing is automatic per environment (you never toggle it)
+
+Whether search engines may index a build is decided **automatically** by one
+build-time environment variable — `SEO_INDEX` — read in `src/lib/env.ts`:
+
+| Environment                            | `SEO_INDEX` set? | Result              |
+| -------------------------------------- | ---------------- | ------------------- |
+| Production (`main` → sfinnovator.com)  | **yes** (`true`) | indexable           |
+| Preview deployments (`feature/*`, PRs) | no               | `noindex, nofollow` |
+| Local (`npm run build`)                | no               | `noindex, nofollow` |
+
+So **everything you merge to `main` is automatically SEO-ready/indexable**, and
+**every preview URL is automatically hidden** from Google — no per-page or
+per-deploy editing. A page can still force itself noindex via its `noindex` prop
+(the 404 page does this regardless of environment).
+
+**Fail-safe:** if the flag is missing for any reason, the build is `noindex`. You
+can never accidentally index an unfinished preview; the only thing to remember is
+to set the flag on production **once**, at launch.
+
+### One-time setup at launch (the only manual step)
+
+In the Cloudflare dashboard → your project → **Settings → Variables and Secrets →
+Environment variables**, add for the **Production** environment only:
+
+```
+SEO_INDEX = true
+```
+
+Do **not** add it to Preview. Redeploy `main` once after setting it. That's it —
+indexing is then hands-off forever.
+
+### Verify which mode a build is in
+
+```bash
+# local/preview build → every page has noindex:
+npm run build && grep -c 'noindex, nofollow' dist/index.html      # 1
+
+# simulate production locally → pages are indexable (404 stays noindex):
+SEO_INDEX=true npm run build && grep -c 'noindex, nofollow' dist/index.html   # 0
+```
+
+On the live domain after launch: `curl -s https://sfinnovator.com/ | grep noindex`
+should return **nothing** (indexable); a `*.pages.dev` preview should still show it.
+
+---
+
 ## Security note (SEO didn't weaken it)
 
 All SEO output is static `<head>` markup + a **non-executable** `application/ld+json`
@@ -116,6 +163,8 @@ See `SECURITY.md` for the full posture.
 **Before pointing the real domain live:**
 
 - [ ] `SITE.url` in `consts.ts` = `https://sfinnovator.com` (drives canonical/sitemap/OG).
+- [ ] **Set `SEO_INDEX=true` on the Cloudflare Production environment** (see "Indexing is
+      automatic" above). Without it, production stays noindex — by design.
 - [ ] `og-default.png` exists and looks right (open it, or share-preview a URL).
 - [ ] Each post has a specific, < 160-char `description`.
 
