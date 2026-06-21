@@ -93,46 +93,39 @@ out. Nothing per-post to configure beyond a good `title` + `description`.
 
 ---
 
-## Indexing is automatic per environment (you never toggle it)
+## Indexing is automatic per environment (zero setup, nothing to toggle)
 
-Whether search engines may index a build is decided **automatically** by one
-build-time environment variable — `SEO_INDEX` — read in `src/lib/env.ts`:
+Whether search engines may index a build is decided **automatically** by the git
+branch, using a variable Cloudflare injects on every build — `WORKERS_CI_BRANCH`
+— read in `src/lib/env.ts`. Only the `main` branch is treated as production.
 
-| Environment                            | `SEO_INDEX` set? | Result              |
-| -------------------------------------- | ---------------- | ------------------- |
-| Production (`main` → sfinnovator.com)  | **yes** (`true`) | indexable           |
-| Preview deployments (`feature/*`, PRs) | no               | `noindex, nofollow` |
-| Local (`npm run build`)                | no               | `noindex, nofollow` |
+| Environment                            | How detected                   | Result              |
+| -------------------------------------- | ------------------------------ | ------------------- |
+| Production (`main` → sfinnovator.com)  | `WORKERS_CI_BRANCH === 'main'` | indexable           |
+| Preview deployments (`feature/*`, PRs) | branch ≠ main                  | `noindex, nofollow` |
+| Local (`npm run build`)                | no CI vars                     | `noindex, nofollow` |
 
 So **everything you merge to `main` is automatically SEO-ready/indexable**, and
-**every preview URL is automatically hidden** from Google — no per-page or
-per-deploy editing. A page can still force itself noindex via its `noindex` prop
-(the 404 page does this regardless of environment).
+**every preview URL is automatically hidden** from Google — no per-page editing,
+**no dashboard setup, and nothing to remember at launch.** A page can still force
+itself noindex via its `noindex` prop (the 404 page does, in any environment).
 
-**Fail-safe:** if the flag is missing for any reason, the build is `noindex`. You
-can never accidentally index an unfinished preview; the only thing to remember is
-to set the flag on production **once**, at launch.
+**Fail-safe:** if the branch isn't `main` for any reason, the build is `noindex`
+— we can never accidentally index a preview or local build.
 
-### One-time setup at launch (the only manual step)
-
-In the Cloudflare dashboard → your project → **Settings → Variables and Secrets →
-Environment variables**, add for the **Production** environment only:
-
-```
-SEO_INDEX = true
-```
-
-Do **not** add it to Preview. Redeploy `main` once after setting it. That's it —
-indexing is then hands-off forever.
+**Optional manual override:** setting a build variable `SEO_INDEX=true`
+(Cloudflare → Settings → **Build** → "Build variables and secrets" — note: the
+**Build** section, not the runtime "Variables & Secrets" one) forces a build to
+be indexable. You won't normally need this; the branch check handles it.
 
 ### Verify which mode a build is in
 
 ```bash
 # local/preview build → every page has noindex:
-npm run build && grep -c 'noindex, nofollow' dist/index.html      # 1
+npm run build && grep -c 'noindex, nofollow' dist/index.html              # 1
 
-# simulate production locally → pages are indexable (404 stays noindex):
-SEO_INDEX=true npm run build && grep -c 'noindex, nofollow' dist/index.html   # 0
+# simulate the Cloudflare production (main) build → indexable (404 stays noindex):
+WORKERS_CI_BRANCH=main npm run build && grep -c 'noindex, nofollow' dist/index.html   # 0
 ```
 
 On the live domain after launch: `curl -s https://sfinnovator.com/ | grep noindex`
@@ -163,8 +156,9 @@ See `SECURITY.md` for the full posture.
 **Before pointing the real domain live:**
 
 - [ ] `SITE.url` in `consts.ts` = `https://sfinnovator.com` (drives canonical/sitemap/OG).
-- [ ] **Set `SEO_INDEX=true` on the Cloudflare Production environment** (see "Indexing is
-      automatic" above). Without it, production stays noindex — by design.
+- [ ] Indexing needs **no action** — the `main` branch auto-indexes (see "Indexing is
+      automatic" above). Just confirm post-launch that `curl https://sfinnovator.com/ |
+    grep noindex` returns nothing.
 - [ ] `og-default.png` exists and looks right (open it, or share-preview a URL).
 - [ ] Each post has a specific, < 160-char `description`.
 
