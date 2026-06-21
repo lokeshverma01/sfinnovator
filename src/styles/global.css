@@ -165,6 +165,28 @@ button,
   color: var(--c-investigating);
   background: var(--c-investigating-bg);
 }
+/* Portfolio status → reuse the same colour tokens (CSP-safe classes). */
+.badge-shipped {
+  color: var(--c-solved);
+  background: var(--c-solved-bg);
+}
+.badge-in-progress {
+  color: var(--c-workaround);
+  background: var(--c-workaround-bg);
+}
+.badge-concept {
+  color: var(--c-investigating);
+  background: var(--c-investigating-bg);
+}
+
+/*
+ * Portfolio thumbnail fallback — soft accent gradient behind project initials,
+ * used when a solution has no `image`. Class-based (no inline styles) for CSP.
+ */
+.thumb-fallback {
+  background:
+    radial-gradient(circle at 30% 30%, var(--accent-soft), transparent 70%), var(--bg-subtle);
+}
 
 /*
  * Callout boxes (the auto-rendered structured frontmatter fields).
@@ -324,4 +346,20 @@ button,
 .prose th {
   background: var(--bg-subtle);
   font-weight: 640;
+}
+
+/*
+ * Pagefind UI theme bridge — map Pagefind's CSS variables to our tokens so the
+ * search widget matches the site in light/dark. Pagefind ships its own
+ * stylesheet; we only override its variables (no layout hacks).
+ */
+.pf-search {
+  --pagefind-ui-primary: var(--accent);
+  --pagefind-ui-text: var(--text);
+  --pagefind-ui-background: var(--bg-subtle);
+  --pagefind-ui-border: var(--border);
+  --pagefind-ui-tag: var(--bg-subtle);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 11px;
+  --pagefind-ui-font: var(--font-sans);
 }

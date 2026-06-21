@@ -52,14 +52,19 @@ export default defineConfig({
         "default-src 'self'",
         "img-src 'self' data:",
         "font-src 'self' data:",
+        // Pagefind fetches its index + wasm from same-origin /pagefind/.
         "connect-src 'self'",
         "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",
       ],
-      // Allow our no-flash inline theme bootstrap (hash auto-derived above).
       scriptDirective: {
+        // - prepaintHash: our no-flash inline theme bootstrap (auto-derived).
+        // - 'wasm-unsafe-eval': Pagefind runs a small WebAssembly module for
+        //   in-browser search; this is the narrow, modern allowance for wasm
+        //   (NOT the dangerous 'unsafe-eval'). Same-origin scripts only.
         hashes: [prepaintHash],
+        resources: ["'self'", "'wasm-unsafe-eval'"],
       },
     },
   },

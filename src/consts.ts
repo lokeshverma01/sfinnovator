@@ -22,6 +22,26 @@ export const SITE = {
   locale: 'en',
 } as const;
 
+/**
+ * Author profile — shown in the portfolio intro (and reusable elsewhere).
+ * Single source of truth for "who built this". Edit here, not in components.
+ *   initials → used for the avatar when no photo is set
+ *   photo    → optional path to a real headshot in /public/images
+ *   links    → quick links shown under the bio (label + href)
+ */
+export const AUTHOR = {
+  name: 'Lokesh Verma',
+  role: 'Salesforce Developer & Architect',
+  initials: 'LV',
+  photo: undefined as string | undefined,
+  bio: 'I build and document Salesforce solutions end to end — from out-of-the-box features to debugging the gnarly stuff. Everything here is real, working, and verifiable: a portfolio should let you try the thing, not just read about it.',
+  links: [
+    { label: 'GitHub', href: 'https://github.com/lokeshverma01' },
+    { label: 'LinkedIn', href: '#' },
+    { label: 'Read the blog', href: '/blog' },
+  ] as { label: string; href: string }[],
+} as const;
+
 /** Primary navigation. Add links here; Header renders them automatically. */
 export const NAV_LINKS: { label: string; href: string }[] = [
   { label: 'Blog', href: '/blog' },

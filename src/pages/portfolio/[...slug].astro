@@ -1,0 +1,108 @@
+---
+/**
+ * /portfolio/<slug> — a solution detail page.
+ *
+ * Uniform template, flexible content: the hero shows only the action links the
+ * solution has; the sidecard shows only the metadata that's set; the body is
+ * the MDX content (can be brief). One static page per published solution.
+ */
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/ui/Container.astro';
+import Badge from '../../components/blog/Badge.astro';
+import { getPublishedSolutions } from '../../lib/portfolio';
+import { statusBadge, actionLinks } from '../../lib/solution';
+import '../../styles/prism.css';
+
+export async function getStaticPaths() {
+  const solutions = await getPublishedSolutions();
+  return solutions.map((solution) => ({
+    params: { slug: solution.id },
+    props: { solution },
+  }));
+}
+
+const { solution } = Astro.props;
+const d = solution.data;
+const { Content } = await render(solution);
+
+const status = statusBadge(d.status);
+const links = actionLinks(d);
+
+const dateFmt = (date: Date) =>
+  new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
+
+// Sidecard rows — only those with a value.
+const details: { label: string; value: string }[] = [];
+if (status) details.push({ label: 'Status', value: status.label });
+if (d.role) details.push({ label: 'Role', value: d.role });
+if (d.tech.length) details.push({ label: 'Tech', value: d.tech.join(' · ') });
+if (d.completedAt) details.push({ label: 'Completed', value: dateFmt(d.completedAt) });
+---
+
+<BaseLayout title={d.title} description={d.summary} image={d.image} type="article">
+  <Container class="max-w-3xl">
+    <div class="pt-9">
+      <a
+        href="/portfolio"
+        class="font-mono text-[13px] text-[var(--text-muted)] hover:text-[var(--text)]"
+      >
+        ← Portfolio
+      </a>
+
+      <div class="mt-3.5 flex flex-wrap items-center gap-3">
+        <h1 class="text-3xl font-bold tracking-[-0.025em] sm:text-4xl">{d.title}</h1>
+        {status && <Badge variant={status.variant} label={status.label} />}
+      </div>
+
+      <p class="mt-2 max-w-2xl text-[17px] text-[var(--text-muted)]">{d.tagline ?? d.summary}</p>
+
+      {
+        links.length > 0 && (
+          <div class="flex flex-wrap gap-2.5 border-b border-[var(--border)] pb-6">
+            {links.map((l) => (
+              <a
+                href={l.href}
+                class:list={[
+                  'inline-flex items-center gap-1.5 rounded-[10px] border px-[18px] py-2.5 text-[14px] font-medium',
+                  l.primary
+                    ? 'border-[var(--accent)] bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]'
+                    : 'border-[var(--border)] hover:border-[var(--accent)]',
+                ]}
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+
+    <div class="grid grid-cols-1 gap-11 py-7 lg:grid-cols-[1fr_240px]">
+      <article class="prose min-w-0">
+        <Content />
+      </article>
+
+      {
+        details.length > 0 && (
+          <aside class="sticky top-[88px] self-start rounded-[14px] border border-[var(--border)] bg-[var(--bg-subtle)] p-[18px]">
+            <h4 class="mb-2.5 text-[11px] font-bold tracking-[0.07em] text-[var(--text-muted)] uppercase">
+              Project details
+            </h4>
+            {details.map((row, i) => (
+              <div
+                class:list={[
+                  'flex justify-between gap-3 py-[7px] text-[13.5px]',
+                  i < details.length - 1 && 'border-b border-[var(--border)]',
+                ]}
+              >
+                <span class="text-[var(--text-muted)]">{row.label}</span>
+                <span class="text-right">{row.value}</span>
+              </div>
+            ))}
+          </aside>
+        )
+      }
+    </div>
+  </Container>
+</BaseLayout>

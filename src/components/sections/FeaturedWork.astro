@@ -1,0 +1,50 @@
+---
+/**
+ * FeaturedWork — compact 3-tile "Featured work" strip for the homepage.
+ * Shows solutions marked `featured`. Renders nothing if there are none, so the
+ * homepage stays clean until you feature a project.
+ */
+import Container from '../ui/Container.astro';
+import { getFeaturedSolutions } from '../../lib/portfolio';
+import { initialsOf } from '../../lib/solution';
+
+const solutions = await getFeaturedSolutions(3);
+---
+
+{
+  solutions.length > 0 && (
+    <section class="py-8">
+      <Container>
+        <div class="mb-5 flex items-end justify-between">
+          <div>
+            <h2 class="text-2xl font-bold tracking-[-0.02em]">Featured work</h2>
+            <p class="mt-1 text-sm text-[var(--text-muted)]">
+              A few solutions you can try and validate yourself.
+            </p>
+          </div>
+          <a
+            href="/portfolio"
+            class="text-[13.5px] font-medium whitespace-nowrap text-[var(--accent)]"
+          >
+            All projects →
+          </a>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          {solutions.map((s) => (
+            <a
+              href={`/portfolio/${s.id}/`}
+              class="card rounded-[14px] border border-[var(--border)] bg-[var(--bg-card)] p-[18px] shadow-[var(--shadow)] transition-transform hover:-translate-y-[2px] hover:border-[var(--accent)]"
+            >
+              <div class="thumb-fallback mb-3 grid h-9 w-9 place-items-center rounded-[9px] text-sm font-extrabold text-[var(--accent)]">
+                {initialsOf(s.data.title)}
+              </div>
+              <h3 class="text-[15.5px] font-semibold">{s.data.title}</h3>
+              <p class="mt-1 text-[13px] text-[var(--text-muted)]">{s.data.summary}</p>
+            </a>
+          ))}
+        </div>
+      </Container>
+    </section>
+  )
+}
