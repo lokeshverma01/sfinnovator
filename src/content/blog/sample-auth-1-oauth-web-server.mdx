@@ -1,0 +1,36 @@
+---
+type: implementation
+title: 'OAuth 2.0 Web Server Flow in Salesforce'
+description: 'The most common OAuth flow — a server-side app exchanging an authorization code for an access token.'
+publishedAt: 2026-06-21
+difficulty: Intermediate
+tags: [OAuth, Identity, Connected Apps]
+series: authentication
+seriesOrder: 1
+objective: 'Implement the OAuth 2.0 Web Server flow between an external app and Salesforce using a Connected App.'
+prerequisites:
+  - 'A Salesforce org with permission to create Connected Apps'
+  - 'An external web app that can keep a client secret'
+outcome: 'A working authorization-code exchange that returns an access + refresh token.'
+---
+
+## What this flow is
+
+The web server flow is for server-side apps that can protect a client secret. The user
+authorizes once; your server swaps the returned code for tokens.
+
+## Set up the Connected App
+
+1. Setup → App Manager → New Connected App.
+2. Enable OAuth, set the callback URL, pick scopes.
+
+```bash
+# Exchange the code for tokens
+curl https://login.salesforce.com/services/oauth2/token \
+  -d grant_type=authorization_code -d code=$CODE \
+  -d client_id=$CID -d client_secret=$SECRET -d redirect_uri=$CB
+```
+
+## Test it
+
+Walk the redirect, capture the code, exchange it, and confirm you get an access token.

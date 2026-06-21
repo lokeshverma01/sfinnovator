@@ -30,6 +30,13 @@ const baseFields = {
   updatedAt: z.coerce.date().optional(),
   tags: z.array(z.string()).default([]),
   difficulty: z.enum(DIFFICULTY_LEVELS).optional(),
+  /**
+   * Series membership (optional). Set `series` to a series slug (the file name
+   * in src/content/series/) and `seriesOrder` to this post's position (1, 2, …).
+   * A post with no `series` behaves exactly as before — fully optional.
+   */
+  series: z.string().optional(),
+  seriesOrder: z.number().optional(),
   /** Pin to the homepage "Featured" slot. */
   featured: z.boolean().default(false),
   /** Custom social share image; falls back to the site default. */
@@ -131,4 +138,29 @@ const portfolio = defineCollection({
   }),
 });
 
-export const collections = { blog, portfolio };
+/**
+ * Series collection — one .mdx file per multi-part series.
+ *
+ * The file NAME is the series slug that posts reference via their `series`
+ * field (e.g. src/content/series/authentication.mdx → series: authentication).
+ * The body is the series intro shown on the landing page.
+ *
+ * `upcoming` lets you tease parts not written yet (shown greyed on the landing
+ * page as a roadmap). Optional — omit it to show only published parts.
+ */
+const series = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/series' }),
+  schema: z.object({
+    title: z.string().max(90),
+    description: z.string().max(200),
+    tags: z.array(z.string()).default([]),
+    /** Sort weight on the /blog/series index (lower = earlier). */
+    order: z.number().default(100),
+    /** Optional roadmap of not-yet-written parts (titles only). */
+    upcoming: z.array(z.string()).default([]),
+    /** Visibility switch — same semantics as posts. */
+    published: z.boolean().default(true),
+  }),
+});
+
+export const collections = { blog, portfolio, series };

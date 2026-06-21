@@ -1,0 +1,49 @@
+---
+/**
+ * /blog/series — index of all multi-part series.
+ * Each card links to a series landing page. More specific than /blog/[...page],
+ * so Astro routes /blog/series here (not to the paginated listing).
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Container from '../../../components/ui/Container.astro';
+import { getSeriesList, getSeriesPosts } from '../../../lib/series';
+
+const seriesList = await getSeriesList();
+// Count published parts per series for the card.
+const withCounts = await Promise.all(
+  seriesList.map(async (s) => ({ s, count: (await getSeriesPosts(s.id)).length }))
+);
+---
+
+<BaseLayout title="Series" description="Multi-part guides that walk a Salesforce topic end to end.">
+  <Container class="max-w-3xl">
+    <div class="pt-12">
+      <h1 class="text-3xl font-bold tracking-[-0.02em]">Series</h1>
+      <p class="mt-1.5 text-[var(--text-muted)]">Multi-part guides that walk a topic end to end.</p>
+    </div>
+
+    {
+      withCounts.length === 0 ? (
+        <div class="my-8 rounded-[14px] border border-dashed border-[var(--border)] bg-[var(--bg-subtle)] px-6 py-16 text-center">
+          <p class="text-sm text-[var(--text-muted)]">No series yet — check back soon.</p>
+        </div>
+      ) : (
+        <div class="my-6 grid gap-3.5">
+          {withCounts.map(({ s, count }) => (
+            <a
+              href={`/blog/series/${s.id}/`}
+              class="card rounded-[14px] border border-[var(--border)] bg-[var(--bg-card)] p-[22px] shadow-[var(--shadow)] transition-transform hover:-translate-y-[2px] hover:border-[var(--accent)]"
+            >
+              <h2 class="text-[19px] font-semibold tracking-[-0.01em]">{s.data.title}</h2>
+              <p class="mt-1.5 text-[14px] text-[var(--text-muted)]">{s.data.description}</p>
+              <div class="mt-2.5 font-mono text-[12px] text-[var(--accent)]">
+                {count} {count === 1 ? 'part' : 'parts'} published
+                {s.data.upcoming.length > 0 && ` · ${s.data.upcoming.length} upcoming`} →
+              </div>
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </Container>
+</BaseLayout>

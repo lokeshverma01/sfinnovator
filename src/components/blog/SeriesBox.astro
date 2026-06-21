@@ -1,0 +1,50 @@
+---
+/**
+ * SeriesBox — in-post series navigation. Shows "Part X of N · <series>", a link
+ * to the full series, and the ordered outline of all parts with the current one
+ * highlighted. Rendered near the top of a post that belongs to a series.
+ *
+ * Props: ctx — the SeriesContext from lib/series.ts (or render nothing if null).
+ */
+import type { SeriesContext } from '../../lib/series';
+
+interface Props {
+  ctx: SeriesContext;
+}
+const { ctx } = Astro.props;
+const { series, parts, index } = ctx;
+// "of N" reflects the full planned series (published + upcoming roadmap), so it
+// matches the landing page count and signals there's more to come.
+const plannedTotal = ctx.total + series.data.upcoming.length;
+---
+
+<div class="seriesbox not-prose">
+  <div class="seriesbox-top">
+    <span class="seriesbox-label">
+      ◆ Part {index + 1} of {plannedTotal} · {series.data.title}
+    </span>
+    <a
+      href={`/blog/series/${series.id}/`}
+      class="font-mono text-[12px] text-[var(--accent)] hover:underline"
+    >
+      View full series →
+    </a>
+  </div>
+  <ol>
+    {
+      parts.map((p, i) => (
+        <li class={i === index ? 'current' : ''}>
+          {i === index ? (
+            <span>
+              {p.data.title} <span class="text-[var(--text-muted)]">(you are here)</span>
+            </span>
+          ) : (
+            <a href={`/blog/${p.id}/`} class="text-[var(--accent)] hover:underline">
+              {p.data.title}
+            </a>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</div>

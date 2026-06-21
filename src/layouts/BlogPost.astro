@@ -19,8 +19,10 @@ import Badge from '../components/blog/Badge.astro';
 import Callout from '../components/blog/Callout.astro';
 import PostMeta from '../components/blog/PostMeta.astro';
 import TableOfContents from '../components/blog/TableOfContents.astro';
+import SeriesBox from '../components/blog/SeriesBox.astro';
 import { postType, POST_STATUSES } from '../consts';
 import { readingTime } from '../lib/readingTime';
+import type { SeriesContext } from '../lib/series';
 import type { MarkdownHeading } from 'astro';
 import '../styles/prism.css';
 
@@ -28,8 +30,10 @@ interface Props {
   data: Record<string, any>;
   headings: MarkdownHeading[];
   body?: string;
+  /** Series context if this post belongs to a series (else null/undefined). */
+  seriesCtx?: SeriesContext | null;
 }
-const { data, headings, body } = Astro.props;
+const { data, headings, body, seriesCtx } = Astro.props;
 
 const type = postType(data.type);
 const typeBadgeVariant =
@@ -87,6 +91,9 @@ const mins = readingTime(body);
     <!-- Body + TOC -->
     <div class="grid grid-cols-1 gap-12 py-8 lg:grid-cols-[1fr_220px]">
       <article class="prose min-w-0">
+        <!-- Series navigation (only if this post is part of a series) -->
+        {seriesCtx && <SeriesBox ctx={seriesCtx} />}
+
         <!-- TOP callouts: auto-rendered from type-specific frontmatter -->
         {
           data.type === 'debugging' && (
@@ -163,6 +170,36 @@ const mins = readingTime(body);
                   {t}
                 </span>
               ))}
+            </div>
+          )
+        }
+
+        <!-- Series prev/next (only within a series) -->
+        {
+          seriesCtx && (seriesCtx.prev || seriesCtx.next) && (
+            <div class="not-prose mt-10 flex flex-col gap-3 sm:flex-row sm:justify-between">
+              {seriesCtx.prev ? (
+                <a
+                  href={`/blog/${seriesCtx.prev.id}/`}
+                  class="flex-1 rounded-[11px] border border-[var(--border)] bg-[var(--bg-card)] p-4 hover:border-[var(--accent)]"
+                >
+                  <div class="font-mono text-[12px] text-[var(--text-muted)]">← Previous part</div>
+                  <div class="mt-1 text-[14.5px] font-semibold">{seriesCtx.prev.data.title}</div>
+                </a>
+              ) : (
+                <span class="flex-1" />
+              )}
+              {seriesCtx.next ? (
+                <a
+                  href={`/blog/${seriesCtx.next.id}/`}
+                  class="flex-1 rounded-[11px] border border-[var(--border)] bg-[var(--bg-card)] p-4 text-right hover:border-[var(--accent)]"
+                >
+                  <div class="font-mono text-[12px] text-[var(--text-muted)]">Next part →</div>
+                  <div class="mt-1 text-[14.5px] font-semibold">{seriesCtx.next.data.title}</div>
+                </a>
+              ) : (
+                <span class="flex-1" />
+              )}
             </div>
           )
         }
