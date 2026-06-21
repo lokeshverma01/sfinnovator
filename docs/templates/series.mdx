@@ -1,0 +1,31 @@
+---
+# ── SERIES ─────────────────────────────────────────────────────────────────
+# Copy this into src/content/series/your-series-slug.mdx
+# The file NAME is the slug posts reference. e.g. authentication.mdx → a post
+# joins it with:  series: authentication
+# The body below becomes the intro shown on the series landing page.
+
+title: '' # ← series name                              (REQUIRED)
+description: '' # ← one line describing the series           (REQUIRED, < 200)
+tags: [Identity, Security] # ← optional topic tags
+order: 100 # ← lower = appears earlier on /blog/series
+upcoming: # ← OPTIONAL roadmap of parts not written yet (titles only).
+  - 'Part you plan to write' #    Shown greyed on the landing page. Delete if unused.
+published: true # ← false = hide the whole series
+---
+
+Write the series introduction here. Explain what the series covers, who it's for, and
+how to approach it (read in order, or jump to a part). This text shows at the top of the
+series landing page.
+
+## To add a part to this series
+
+In any blog post's frontmatter, add:
+
+```
+series: your-series-slug
+seriesOrder: 1
+```
+
+`seriesOrder` sets the position (1, 2, 3 …). That's it — the post automatically appears
+in this series, gets the in-post "Part X of N" box, and Prev/Next links.

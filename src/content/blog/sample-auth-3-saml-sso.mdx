@@ -1,0 +1,29 @@
+---
+type: implementation
+title: 'SAML SSO with an external Identity Provider'
+description: 'Federated single sign-on from an external IdP (Okta, Azure AD) into Salesforce.'
+publishedAt: 2026-07-05
+difficulty: Intermediate
+tags: [SAML, SSO, Identity]
+series: authentication
+seriesOrder: 3
+objective: 'Configure SAML-based SSO so users log into Salesforce via an external IdP.'
+prerequisites:
+  - 'An IdP (Okta, Azure AD, etc.) you can configure'
+  - 'Salesforce admin access to SSO settings'
+outcome: 'Users authenticate at the IdP and land in Salesforce already logged in.'
+---
+
+## How SAML SSO works
+
+The IdP asserts the user's identity to Salesforce (the service provider) via a signed
+SAML assertion. No password is stored in Salesforce.
+
+## Configure Salesforce
+
+1. Setup → Single Sign-On Settings → enable SAML.
+2. Add the IdP metadata (entity ID, login URL, certificate).
+
+## Test it
+
+Use the IdP-initiated login and confirm the user lands in Salesforce.

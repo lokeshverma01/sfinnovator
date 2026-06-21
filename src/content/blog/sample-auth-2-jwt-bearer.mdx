@@ -1,0 +1,30 @@
+---
+type: implementation
+title: 'JWT Bearer Flow for server-to-server auth'
+description: 'No user interaction — authenticate backend integrations with a signed JWT assertion.'
+publishedAt: 2026-06-28
+difficulty: Advanced
+tags: [OAuth, JWT, Integration]
+series: authentication
+seriesOrder: 2
+objective: 'Authenticate a server-to-server integration using the OAuth 2.0 JWT Bearer flow.'
+prerequisites:
+  - 'A Connected App configured for JWT (with a certificate)'
+  - 'A private key to sign the assertion'
+outcome: 'A token obtained with no interactive login, ideal for backend jobs.'
+---
+
+## When to use it
+
+Backend integrations with no user present. You sign a JWT with your private key; Salesforce
+trusts the matching certificate.
+
+```bash
+curl https://login.salesforce.com/services/oauth2/token \
+  -d grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer \
+  -d assertion=$SIGNED_JWT
+```
+
+## Notes
+
+Keep the private key in a secret store; never commit it.

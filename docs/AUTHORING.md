@@ -121,6 +121,41 @@ project with no links just shows no buttons — that's fine and intended.
 
 ---
 
+## Creating a SERIES (multi-part guides)
+
+A series groups related posts into an ordered, guided path (e.g. an "Authentication"
+series covering each provider). It gives you:
+
+- A **series landing page** at `/blog/series/<slug>` listing all parts in order.
+- An automatic **"Part X of N" box** + **Previous/Next** links inside each post.
+- An entry on the **/blog/series** index (and the "Series" link in the top nav).
+
+### Step 1 — Create the series (once)
+
+1. Copy [`templates/series.mdx`](./templates/series.mdx).
+2. Save it as `src/content/series/<slug>.mdx`, e.g. `authentication.mdx`. The file name is
+   the **series slug**.
+3. Fill `title`, `description`, and write the intro in the body. Optionally list
+   `upcoming:` parts you haven't written yet (they show greyed as a roadmap).
+
+### Step 2 — Add posts to the series
+
+In each post's frontmatter, add two lines:
+
+```yaml
+series: authentication # the series slug (the series file name)
+seriesOrder: 1 # this post's position: 1, 2, 3, …
+```
+
+That's all. The post auto-joins the series, gets the navigation box, and slots into the
+landing page at its `seriesOrder` position. A post with **no** `series` field is
+unaffected.
+
+> The "Part X of **N**" count includes your `upcoming` roadmap, so it reflects the full
+> planned series and signals there's more coming.
+
+---
+
 ## The `published` switch (taking things public / private)
 
 Every post and solution has `published`:

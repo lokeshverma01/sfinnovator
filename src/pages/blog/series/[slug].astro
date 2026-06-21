@@ -1,0 +1,104 @@
+---
+/**
+ * /blog/series/<slug> — a series landing page: intro + ordered list of parts
+ * (+ greyed "upcoming" roadmap). One static page per published series.
+ */
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Container from '../../../components/ui/Container.astro';
+import { getSeriesList, getSeriesPosts } from '../../../lib/series';
+import { postType } from '../../../consts';
+import { readingTime } from '../../../lib/readingTime';
+
+export async function getStaticPaths() {
+  const list = await getSeriesList();
+  return list.map((series) => ({ params: { slug: series.id }, props: { series } }));
+}
+
+const { series } = Astro.props;
+const { Content } = await render(series);
+const parts = await getSeriesPosts(series.id);
+
+const dateFmt = (d: Date) =>
+  new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(d);
+---
+
+<BaseLayout title={series.data.title} description={series.data.description}>
+  <Container class="max-w-3xl">
+    <!-- Hero -->
+    <div class="pt-11">
+      <a
+        href="/blog/series"
+        class="font-mono text-[13px] text-[var(--text-muted)] hover:text-[var(--text)]"
+      >
+        ← All series
+      </a>
+      <div class="mt-4">
+        <span
+          class="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[12px] font-bold tracking-[0.06em] text-[var(--accent)] uppercase"
+        >
+          ◆ Series
+        </span>
+      </div>
+      <h1 class="mt-3 text-3xl font-bold tracking-[-0.025em] sm:text-4xl">{series.data.title}</h1>
+      <p class="mt-2 text-[17px] text-[var(--text-muted)]">{series.data.description}</p>
+      <div
+        class="mt-3.5 flex flex-wrap gap-4 border-b border-[var(--border)] pb-6 font-mono text-[13px] text-[var(--text-muted)]"
+      >
+        <span>📚 {parts.length + series.data.upcoming.length} parts</span>
+        <span
+          >🟢 {parts.length} published{
+            series.data.upcoming.length > 0 && ` · ${series.data.upcoming.length} upcoming`
+          }</span
+        >
+        {series.data.tags.length > 0 && <span>🏷 {series.data.tags.join(' · ')}</span>}
+      </div>
+    </div>
+
+    <!-- Series intro (the .mdx body) -->
+    <article class="prose py-6">
+      <Content />
+    </article>
+
+    <!-- Ordered parts -->
+    <div class="mb-14">
+      {
+        parts.map((p, i) => {
+          const t = postType(p.data.type);
+          return (
+            <a
+              href={`/blog/${p.id}/`}
+              class="card mb-3 flex items-start gap-4 rounded-[14px] border border-[var(--border)] bg-[var(--bg-card)] p-[18px] shadow-[var(--shadow)] transition-transform hover:-translate-y-[2px] hover:border-[var(--accent)]"
+            >
+              <div class="grid h-[34px] w-[34px] flex-shrink-0 place-items-center rounded-[9px] bg-[var(--accent-soft)] text-[14px] font-extrabold text-[var(--accent)]">
+                {i + 1}
+              </div>
+              <div>
+                <h3 class="text-[17px] font-semibold">{p.data.title}</h3>
+                <p class="mt-0.5 text-[13.5px] text-[var(--text-muted)]">{p.data.description}</p>
+                <div class="mt-1.5 font-mono text-[11.5px] text-[var(--text-muted)]">
+                  {t?.icon} {t?.label} · {dateFmt(p.data.publishedAt)} · {readingTime(p.body)} min
+                </div>
+              </div>
+            </a>
+          );
+        })
+      }
+
+      <!-- Upcoming roadmap (greyed, not links) -->
+      {
+        series.data.upcoming.map((title, i) => (
+          <div class="mb-3 flex items-start gap-4 rounded-[14px] border border-dashed border-[var(--border)] p-[18px] opacity-60">
+            <div class="grid h-[34px] w-[34px] flex-shrink-0 place-items-center rounded-[9px] bg-[var(--bg-subtle)] text-[14px] font-extrabold text-[var(--text-muted)]">
+              {parts.length + i + 1}
+            </div>
+            <div>
+              <h3 class="text-[17px] font-semibold">{title}</h3>
+              <div class="mt-1.5 font-mono text-[11.5px] text-[var(--text-muted)]">⏳ Upcoming</div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </Container>
+</BaseLayout>
