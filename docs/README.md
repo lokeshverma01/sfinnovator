@@ -5,6 +5,8 @@ describes. Start here:
 
 | Document                                             | What it's for                                                        |
 | ---------------------------------------------------- | -------------------------------------------------------------------- |
+| **[AUTHORING.md](./AUTHORING.md)**                   | **No-code publishing: add a post/solution by filling one file.**     |
+| [templates/](./templates/)                           | Copy-paste starter files for each post type + portfolio solution.    |
 | [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) | Step-by-step build journal. Follow it to rebuild the site from zero. |
 | [COMPONENT_REFERENCE.md](./COMPONENT_REFERENCE.md)   | Map of every file/component: path, purpose, props, dependencies.     |
 | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)           | "If X fails, look here" — pinpoint the file, fix, and confirm.       |
