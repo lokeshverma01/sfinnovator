@@ -56,20 +56,26 @@ src/
 
 ## 5. Roadmap
 
-| Phase | Goal                                     | Status       |
-| ----- | ---------------------------------------- | ------------ |
-| 0     | Scaffold, git, deploy pipeline           | ✅ Done      |
-| 1     | Landing page (hero, features, theme)     | ✅ Built     |
-| 1.5   | Design finalisation (mockup → code)      | ✅ Done      |
-| 1.6   | Docs system + security baseline (CSP)    | ✅ Done      |
-| 1.7   | Cloudflare Pages config (\_headers etc.) | ✅ Done      |
-| 1b    | Push to GitHub + connect Cloudflare Git  | ⬜ Your step |
-| 2     | Blog: listing + post pages from MDX      | ⬜ Next      |
-| 2b    | SEO polish: per-post OG, Lighthouse 95+  | ⬜           |
-| 3     | Portfolio page                           | ⬜           |
-| 5     | Database (Neon) + CMS/portal             | ⬜ Future    |
-| 6     | Writer/Admin RBAC + approval workflow    | ⬜ Future    |
-| 7     | Media library (R2), search, analytics    | ⬜ Future    |
+| Phase | Goal                                                                           | Status                   |
+| ----- | ------------------------------------------------------------------------------ | ------------------------ |
+| 0     | Scaffold, git, deploy pipeline                                                 | ✅ Done                  |
+| 1     | Landing page (hero, features, theme)                                           | ✅ Done                  |
+| 1.5   | Design finalisation (mockup → code)                                            | ✅ Done                  |
+| 1.6   | Docs system + security baseline (CSP)                                          | ✅ Done                  |
+| 1.7   | Cloudflare hosting + Git auto-deploy                                           | ✅ Done                  |
+| 2     | Blog: listing, pagination, categories                                          | ✅ Done                  |
+| 2.1   | Static search (Pagefind)                                                       | ✅ Done                  |
+| 2.2   | Portfolio (cards, detail, homepage tile)                                       | ✅ Done                  |
+| 2.3   | No-code authoring (templates + guides)                                         | ✅ Done                  |
+| 2.4   | Series (multi-part guides)                                                     | ✅ Done                  |
+| 2.5   | Editing guide + component reference                                            | ✅ Done                  |
+| 2.6   | SEO polish (structured data, OG, auto-noindex by env)                          | ✅ Done                  |
+| 2.7   | First real content + content reset                                             | ✅ Done                  |
+| 3     | **LAUNCH: sfinnovator.com live (Cloudflare + Hostinger DNS, www→non-www 301)** | ✅ **Done (2026-06-22)** |
+| 4     | Post-launch: Search Console, workers_dev:false, Lighthouse                     | ⬜ Next                  |
+| 5     | Database (Neon) + CMS/portal                                                   | ⬜ Future                |
+| 6     | Writer/Admin RBAC + approval workflow                                          | ⬜ Future                |
+| 7     | Media library (R2), comments, analytics                                        | ⬜ Future                |
 
 ## 5b. Documentation system
 
@@ -113,3 +119,26 @@ Living docs in [`docs/`](./docs/), updated in the same commit as the code:
   Azure config for parity. Existing `lokesh-portfolio` (Azure CI/CD) left untouched. A
   separate near-duplicate repo `sfinnovator-extension` exists on GitHub but we proceed with
   `claudeterminal`.
+- **2026-06-21** — SEO indexing automated by environment via `WORKERS_CI_BRANCH`
+  (`src/lib/env.ts`): only `main` builds index; previews/local are `noindex`. No dashboard
+  setup. Optional `SEO_INDEX=true` build override.
+- **2026-06-22** — **LAUNCH.** `sfinnovator.com` went live on Cloudflare. Domain registered
+  at **Hostinger**; moved nameservers to Cloudflare. Deleted the old Azure A/CNAME records
+  (root + www) that the site previously used, then attached `sfinnovator.com` + `www` as
+  custom domains on the Worker. Added a **301 redirect `www → non-www`** (canonical host =
+  non-www; matches the canonical tags) → no duplicate content. The old Azure portfolio
+  remains at its `*.azurestaticapps.net` URL, just no longer at this domain.
+- **2026-06-22** — Note: corporate Zscaler networks may block the brand-new domain until
+  it's categorized (submit to sitereview.zscaler.com). Not a site issue; resolves as the
+  domain ages.
+
+## 8. Post-launch checklist (next)
+
+- [ ] Submit `https://sfinnovator.com/sitemap-index.xml` to **Google Search Console**.
+- [ ] Confirm production is indexable: `curl -s https://sfinnovator.com/ | grep noindex` → nothing.
+- [ ] Run **Lighthouse** on the live domain; record scores (then add real numbers to the
+      portfolio "this site" write-up if strong).
+- [ ] Validate a page in Google's **Rich Results Test** (expect Article + Breadcrumb).
+- [ ] Set **`workers_dev: false`** to retire the `*.workers.dev` URL (Cloudflare's own
+      recommendation for production).
+- [ ] (Optional) Submit domain to **Zscaler site review** so it unblocks on the work network.
