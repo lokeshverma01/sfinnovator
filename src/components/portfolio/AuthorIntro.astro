@@ -32,14 +32,19 @@ import { AUTHOR } from '../../consts';
     {
       AUTHOR.links.length > 0 && (
         <div class="mt-3 flex flex-wrap gap-2.5">
-          {AUTHOR.links.map((l) => (
-            <a
-              href={l.href}
-              class="rounded-lg border border-[var(--border)] px-3 py-1.5 text-[13px] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            >
-              {l.label}
-            </a>
-          ))}
+          {AUTHOR.links.map((l) => {
+            // External links (http/mailto) open in a new tab; internal stay put.
+            const external = /^(https?:|mailto:)/.test(l.href);
+            return (
+              <a
+                href={l.href}
+                class="rounded-lg border border-[var(--border)] px-3 py-1.5 text-[13px] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              >
+                {l.label}
+              </a>
+            );
+          })}
         </div>
       )
     }

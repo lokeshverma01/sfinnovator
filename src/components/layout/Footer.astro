@@ -14,13 +14,21 @@ const year = new Date().getFullYear();
       class="flex flex-col items-center justify-between gap-4 text-sm text-[var(--text-muted)] sm:flex-row"
     >
       <p>© {year} {SITE.name}. All rights reserved.</p>
-      <nav class="flex items-center gap-5">
+      <nav class="flex flex-wrap items-center gap-5">
         {
-          SOCIAL_LINKS.map((link) => (
-            <a href={link.href} class="hover:text-[var(--text)]">
-              {link.label}
-            </a>
-          ))
+          SOCIAL_LINKS.map((link) => {
+            // External (http) links open in a new tab; mailto + internal don't.
+            const newTab = /^https?:/.test(link.href);
+            return (
+              <a
+                href={link.href}
+                class="hover:text-[var(--text)]"
+                {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              >
+                {link.label}
+              </a>
+            );
+          })
         }
       </nav>
     </div>

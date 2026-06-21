@@ -10,6 +10,7 @@ symptom: 'System.LimitException: Apex CPU time limit exceeded in a scheduled bat
 environment: 'Batch Apex over ~50k records with nested loops.'
 rootCause: 'Nested loops doing O(n^2) work plus repeated formula recalculation.'
 resolution: 'Pre-build maps for lookups and reduce scope size; a full redesign is tracked separately.'
+published: false
 ---
 
 ## Profiling

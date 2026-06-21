@@ -10,6 +10,7 @@ symptom: 'User input flows directly into a dynamic SOQL string.'
 environment: 'Apex controller building a query from a search box value.'
 rootCause: 'String concatenation of untrusted input into Database.query().'
 resolution: 'Use bind variables or String.escapeSingleQuotes(); prefer static SOQL where possible.'
+published: false
 ---
 
 ## Vulnerable
