@@ -158,7 +158,7 @@ See `SECURITY.md` for the full posture.
 - [ ] `SITE.url` in `consts.ts` = `https://sfinnovator.com` (drives canonical/sitemap/OG).
 - [ ] Indexing needs **no action** — the `main` branch auto-indexes (see "Indexing is
       automatic" above). Just confirm post-launch that `curl https://sfinnovator.com/ |
-    grep noindex` returns nothing.
+  grep noindex` returns nothing.
 - [ ] `og-default.png` exists and looks right (open it, or share-preview a URL).
 - [ ] Each post has a specific, < 160-char `description`.
 

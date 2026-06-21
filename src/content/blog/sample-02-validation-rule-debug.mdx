@@ -10,6 +10,7 @@ symptom: 'A validation rule blocks saves even when the targeted field was not ed
 environment: 'Standard object, validation rule using ISCHANGED on a formula field.'
 rootCause: 'ISCHANGED does not work on formula fields; the formula re-evaluates every save.'
 resolution: 'Reference the underlying source fields with ISCHANGED, not the formula field.'
+published: false
 ---
 
 ## What we expected
