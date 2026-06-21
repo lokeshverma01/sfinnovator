@@ -37,10 +37,13 @@ export const AUTHOR = {
   bio: 'I build and document Salesforce solutions end to end — from out-of-the-box features to debugging the gnarly stuff. Everything here is real, working, and verifiable: a portfolio should let you try the thing, not just read about it.',
   links: [
     { label: 'GitHub', href: 'https://github.com/lokeshverma01' },
-    { label: 'LinkedIn', href: '#' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/verma-lokesh/' },
     { label: 'Read the blog', href: '/blog' },
   ] as { label: string; href: string }[],
 } as const;
+
+/** Contact email — used by the footer "Write us" link and elsewhere. */
+export const CONTACT_EMAIL = 'contact@sfinnovator.com';
 
 /** Primary navigation. Add links here; Header renders them automatically. */
 export const NAV_LINKS: { label: string; href: string }[] = [
@@ -51,7 +54,9 @@ export const NAV_LINKS: { label: string; href: string }[] = [
 
 /** External / social links shown in the footer. */
 export const SOCIAL_LINKS: { label: string; href: string }[] = [
-  { label: 'GitHub', href: 'https://github.com/' },
+  { label: 'GitHub', href: 'https://github.com/lokeshverma01' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/verma-lokesh/' },
+  { label: 'Write us', href: `mailto:${CONTACT_EMAIL}` },
   { label: 'RSS', href: '/rss.xml' },
 ];
 

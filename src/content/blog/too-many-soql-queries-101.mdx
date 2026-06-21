@@ -11,6 +11,7 @@ symptom: 'System.LimitException: Too many SOQL queries: 101 — thrown when savi
 environment: 'Apex trigger on Account, bulk DML (Data Loader, 200 rows).'
 rootCause: 'A SOQL query placed inside a for-loop runs once per record, so 101 records means 101 queries.'
 resolution: 'Move SOQL out of loops: query once with an IN clause and use a Map. The transaction then runs a single query regardless of record volume.'
+published: false
 ---
 
 ## What the error actually means
