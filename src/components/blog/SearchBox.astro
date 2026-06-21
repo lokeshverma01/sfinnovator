@@ -1,29 +1,43 @@
 ---
 /**
- * SearchBox — the blog search input.
+ * SearchBox — instant static search powered by Pagefind.
  *
- * NOTE: this renders the styled input + a results container now. The actual
- * instant-search engine (Pagefind) is wired in a later step; Pagefind's UI
- * script attaches to #search by id. Until then the box is inert but present,
- * so the listing layout is complete and the design is locked.
+ * How it works:
+ *   - `npm run build` runs Astro then `pagefind --site dist`, which scans the
+ *     built post pages (marked with data-pagefind-body) and writes a tiny
+ *     search index + UI bundle to /pagefind/.
+ *   - Here we load that UI and mount it onto #search. Everything runs in the
+ *     browser from same-origin static files — NO database, NO server.
+ *
+ * Note: the /pagefind/ bundle only exists AFTER a build, so search works in
+ * `npm run preview` and in production — not in `npm run dev`.
  */
 ---
 
-<div id="search" class="relative" data-pagefind-search>
-  <svg
-    class="pointer-events-none absolute top-3.5 left-3.5 h-[18px] w-[18px] text-[var(--text-muted)]"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-  >
-    <circle cx="11" cy="11" r="7"></circle>
-    <path d="M21 21l-4-4" stroke-linecap="round"></path>
-  </svg>
-  <input
-    type="search"
-    placeholder="Search posts…"
-    aria-label="Search posts"
-    class="w-full rounded-[11px] border border-[var(--border)] bg-[var(--bg-subtle)] py-3 pr-4 pl-10 text-[15px] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
-  />
-</div>
+<div id="search" class="pf-search"></div>
+
+<!-- Pagefind UI styles + script (same-origin static assets from the build). -->
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+<script src="/pagefind/pagefind-ui.js" is:inline></script>
+
+<script>
+  // Processed (bundled, CSP-hashed) init. Runs after the inline loader above,
+  // so the PagefindUI global is available. Guarded so it no-ops if the bundle
+  // is missing (e.g. during `astro dev`, where there is no index yet).
+  function initPagefind() {
+    const PagefindUI = (window as any).PagefindUI;
+    if (!PagefindUI) return;
+    new PagefindUI({
+      element: '#search',
+      showSubResults: true,
+      showImages: false,
+      resetStyles: false,
+      placeholder: 'Search posts…',
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPagefind);
+  } else {
+    initPagefind();
+  }
+</script>

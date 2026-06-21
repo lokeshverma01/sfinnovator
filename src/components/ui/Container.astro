@@ -2,13 +2,15 @@
 /**
  * Container — constrains content width and adds responsive horizontal padding.
  * Keeps every section aligned to the same readable measure.
+ * Forwards any extra attributes (e.g. data-* ) to the root <div>.
  */
 interface Props {
   class?: string;
+  [key: string]: unknown;
 }
-const { class: className = '' } = Astro.props;
+const { class: className = '', ...rest } = Astro.props;
 ---
 
-<div class={`mx-auto w-full max-w-5xl px-5 sm:px-6 lg:px-8 ${className}`}>
+<div class={`mx-auto w-full max-w-5xl px-5 sm:px-6 lg:px-8 ${className}`} {...rest}>
   <slot />
 </div>

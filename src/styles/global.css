@@ -347,3 +347,19 @@ button,
   background: var(--bg-subtle);
   font-weight: 640;
 }
+
+/*
+ * Pagefind UI theme bridge — map Pagefind's CSS variables to our tokens so the
+ * search widget matches the site in light/dark. Pagefind ships its own
+ * stylesheet; we only override its variables (no layout hacks).
+ */
+.pf-search {
+  --pagefind-ui-primary: var(--accent);
+  --pagefind-ui-text: var(--text);
+  --pagefind-ui-background: var(--bg-subtle);
+  --pagefind-ui-border: var(--border);
+  --pagefind-ui-tag: var(--bg-subtle);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 11px;
+  --pagefind-ui-font: var(--font-sans);
+}
