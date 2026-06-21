@@ -45,6 +45,7 @@ export const AUTHOR = {
 /** Primary navigation. Add links here; Header renders them automatically. */
 export const NAV_LINKS: { label: string; href: string }[] = [
   { label: 'Blog', href: '/blog' },
+  { label: 'Series', href: '/blog/series' },
   { label: 'Portfolio', href: '/portfolio' },
 ];
 

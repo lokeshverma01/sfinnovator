@@ -9,6 +9,7 @@
 import { render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 import { getPublishedPosts } from '../../lib/posts';
+import { getSeriesContext } from '../../lib/series';
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
@@ -20,8 +21,10 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
+// Resolve series context (null if the post isn't part of a series).
+const seriesCtx = await getSeriesContext(post);
 ---
 
-<BlogPost data={post.data} headings={headings} body={post.body}>
+<BlogPost data={post.data} headings={headings} body={post.body} seriesCtx={seriesCtx}>
   <Content />
 </BlogPost>
