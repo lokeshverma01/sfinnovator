@@ -90,4 +90,45 @@ const blog = defineCollection({
   schema: z.discriminatedUnion('type', [implementationSchema, useCaseSchema, debuggingSchema]),
 });
 
-export const collections = { blog };
+/**
+ * Portfolio collection — one .mdx file per solution.
+ *
+ * FLEXIBLE BY DESIGN: only `title` and `summary` are required. Every action
+ * link and metadata field is optional — the card and detail page render only
+ * what you provide, so a write-up-only project and a fully interactive app use
+ * the same template without looking broken.
+ *
+ * Drop a file in src/content/portfolio/ and it automatically becomes a card on
+ * /portfolio, a /portfolio/<slug> detail page, and (if featured) a homepage tile.
+ */
+const portfolio = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/portfolio' }),
+  schema: z.object({
+    title: z.string().max(90),
+    summary: z.string().max(200),
+    /** Optional longer one-liner shown on the detail page hero. */
+    tagline: z.string().optional(),
+    /** Lifecycle badge. Omit to show none. */
+    status: z.enum(['shipped', 'in-progress', 'concept']).optional(),
+    /** Free-form tech badges, e.g. [Flow, LWC, Apex]. */
+    tech: z.array(z.string()).default([]),
+    /** Action links — each is optional; the button shows only if present. */
+    useUrl: z.string().optional(), // try it live
+    validateUrl: z.string().optional(), // verify it yourself (test org / steps)
+    repoUrl: z.string().optional(), // source code
+    blogSlug: z.string().optional(), // related blog post id → /blog/<slug>
+    /** Optional metadata for the detail-page sidecard. */
+    role: z.string().optional(),
+    completedAt: z.coerce.date().optional(),
+    /** Optional thumbnail/social image in /public/images; falls back to initials. */
+    image: z.string().optional(),
+    /** Sort weight on the listing (lower = earlier). Ties break by title. */
+    order: z.number().default(100),
+    /** Pin to the homepage "Featured work" strip. */
+    featured: z.boolean().default(false),
+    /** Visibility switch — same semantics as blog posts. */
+    published: z.boolean().default(true),
+  }),
+});
+
+export const collections = { blog, portfolio };

@@ -1,0 +1,23 @@
+---
+title: Bulk-Safe Trigger Framework
+summary: A lightweight Apex trigger handler pattern that keeps logic bulkified and testable.
+status: shipped
+tech: [Apex, Triggers, Design Patterns]
+repoUrl: https://github.com/lokeshverma01/trigger-framework
+order: 20
+featured: true
+---
+
+## Why a framework
+
+Raw triggers grow messy fast. This handler pattern enforces one trigger per object,
+keeps logic in testable classes, and makes bulk-safety the default.
+
+## What's inside
+
+- A `TriggerHandler` base class with context virtual methods.
+- A dispatcher that routes trigger events to the right handler.
+- Examples and tests.
+
+> This one is a code pattern, not a clickable app — so it has a Source link but no
+> live demo. The template adapts: only the links that exist are shown.

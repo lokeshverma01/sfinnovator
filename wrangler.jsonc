@@ -1,0 +1,21 @@
+{
+  // Cloudflare Workers deploy config.
+  //
+  // Our site is fully STATIC (astro `output: 'static'`), so there is no Worker
+  // script — we only serve the pre-built files in ./dist as static assets.
+  // `npx wrangler versions upload` / `wrangler deploy` read this file to find
+  // them. Committing it (rather than relying on dashboard settings) makes
+  // EVERY branch — production and per-branch previews — deploy identically.
+  //
+  // NOTE: this intentionally differs from Cloudflare's auto-generated config,
+  // which assumes the @astrojs/cloudflare SSR adapter (an entrypoint we don't
+  // use). For a static site, an assets-only config is correct.
+  "name": "sfinnovator",
+  "compatibility_date": "2026-06-20",
+  "assets": {
+    "directory": "./dist",
+  },
+  "observability": {
+    "enabled": true,
+  },
+}
