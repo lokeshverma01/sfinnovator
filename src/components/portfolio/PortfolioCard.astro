@@ -66,6 +66,8 @@ const href = `/portfolio/${solution.id}/`;
           {links.map((l) => (
             <a
               href={l.href}
+              target={l.external ? '_blank' : undefined}
+              rel={l.external ? 'noopener noreferrer' : undefined}
               class:list={[
                 'inline-flex flex-1 items-center justify-center gap-1.5 rounded-[9px] border px-2 py-2 text-[13px] font-medium whitespace-nowrap',
                 l.primary

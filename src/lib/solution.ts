@@ -20,12 +20,19 @@ export function statusBadge(status?: string) {
   }
 }
 
-/** Build the list of action links a solution actually has (skips missing ones). */
+/**
+ * Build the list of action links a solution actually has (skips missing ones).
+ * `external` links point off-site and should open in a new tab; the internal
+ * write-up link stays in the same tab.
+ */
 export function actionLinks(data: SolutionData) {
-  const links: { label: string; href: string; primary?: boolean }[] = [];
-  if (data.useUrl) links.push({ label: '▶ Use it live', href: data.useUrl, primary: true });
-  if (data.validateUrl) links.push({ label: '✓ Validate', href: data.validateUrl });
-  if (data.repoUrl) links.push({ label: '👁 Source', href: data.repoUrl });
+  const links: { label: string; href: string; primary?: boolean; external?: boolean }[] = [];
+  if (data.useUrl)
+    links.push({ label: '▶ Use it live', href: data.useUrl, primary: true, external: true });
+  if (data.demoUrl)
+    links.push({ label: '▶ Watch the demo', href: data.demoUrl, primary: !data.useUrl, external: true });
+  if (data.validateUrl) links.push({ label: '✓ Validate', href: data.validateUrl, external: true });
+  if (data.repoUrl) links.push({ label: '👁 Source', href: data.repoUrl, external: true });
   if (data.blogSlug) links.push({ label: '📝 Read the write-up', href: `/blog/${data.blogSlug}/` });
   return links;
 }
