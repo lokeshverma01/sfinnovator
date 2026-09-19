@@ -21,3 +21,7 @@
 # Static images — cache a week.
 /images/*
   Cache-Control: public, max-age=604800
+
+# Self-hosted media (demo clips + posters) — cache a week.
+/videos/*
+  Cache-Control: public, max-age=604800
