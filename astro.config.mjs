@@ -13,6 +13,25 @@ import { PREPAINT_THEME_SCRIPT } from './src/lib/themeScript.mjs';
 const prepaintHash =
   'sha256-' + createHash('sha256').update(PREPAINT_THEME_SCRIPT, 'utf8').digest('base64');
 
+// Rehype plugin (dependency-free): make external links in Markdown/MDX content
+// open in a new tab, with rel="noopener noreferrer" for security. Only absolute
+// http(s) links are treated as external — internal (relative) links are left
+// alone. Keeps outbound references (e.g. Salesforce docs) from hijacking the
+// current tab and is good for UX + SEO.
+function rehypeExternalLinks() {
+  const walk = (node) => {
+    if (node.type === 'element' && node.tagName === 'a') {
+      const href = node.properties?.href;
+      if (typeof href === 'string' && /^https?:\/\//i.test(href)) {
+        node.properties.target = '_blank';
+        node.properties.rel = ['noopener', 'noreferrer'];
+      }
+    }
+    if (Array.isArray(node.children)) node.children.forEach(walk);
+  };
+  return (tree) => walk(tree);
+}
+
 // https://astro.build/config
 export default defineConfig({
   // IMPORTANT: set this to your live domain. Used for canonical URLs,
@@ -34,6 +53,9 @@ export default defineConfig({
   // stylesheet (src/styles/prism.css) — fully CSP-compatible.
   markdown: {
     syntaxHighlight: 'prism',
+    // Outbound links in content (e.g. Salesforce docs) open in a new tab,
+    // safely (rel=noopener noreferrer). See rehypeExternalLinks above.
+    rehypePlugins: [rehypeExternalLinks],
   },
 
   // Tailwind v4 is wired through the Vite plugin (no tailwind.config.js needed).

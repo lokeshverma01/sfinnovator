@@ -121,6 +121,7 @@ const portfolio = defineCollection({
     tech: z.array(z.string()).default([]),
     /** Action links — each is optional; the button shows only if present. */
     useUrl: z.string().optional(), // try it live
+    demoUrl: z.string().optional(), // ▶ watch a recorded demo (external video link)
     validateUrl: z.string().optional(), // verify it yourself (test org / steps)
     repoUrl: z.string().optional(), // source code
     blogSlug: z.string().optional(), // related blog post id → /blog/<slug>

@@ -1,0 +1,147 @@
+---
+title: 'Where Is This Used? — a field dependency analyzer'
+summary: An LWC + Apex tool that finds everywhere a field is referenced across org metadata — Apex, validation rules, Lightning pages, and reports — in one table.
+tagline: Salesforce's native "Where is this used?" answers part of the question. This rebuilds the honest, complete version — and shows its work.
+status: shipped
+tech: [Salesforce, Apex, LWC, Tooling API, Metadata]
+demoUrl: https://drive.google.com/file/d/1VeUtI8n3cs3DkP7H5vZdZTO-aje7ghcm/view
+repoUrl: https://github.com/lokeshverma01/where-is-this-used
+role: Architect & Builder
+completedAt: 2026-07-19
+order: 2
+featured: true
+published: true
+---
+
+## The problem
+
+Before you change or delete a field in Salesforce, you need to know one thing: **where is it
+actually used?** Miss a reference and you break a validation rule, blank out a Lightning page,
+or quietly corrupt a report.
+
+Salesforce ships a native _"Where is this used?"_ button for exactly this — but it only covers
+part of the picture, and it never tells you *how* it knows. I set out to rebuild that answer
+properly: pick an object, multi-select its fields, and see **every reference across the org's
+metadata** — Apex, validation rules, Lightning pages (FlexiPages), and Reports — in one
+structured table, with each result tagged by where the evidence came from.
+
+Important distinction: this reads **metadata** (the definitions of pages, reports, and rules),
+not **data** (records).
+
+## See it in action
+
+<figure>
+  <video
+    controls
+    preload="none"
+    playsinline
+    poster="/videos/where-is-this-used-demo-poster.jpg"
+  >
+    <source src="/videos/where-is-this-used-demo.mp4" type="video/mp4" />
+    Your browser can’t play the embedded video —{' '}
+    <a
+      href="https://drive.google.com/file/d/1VeUtI8n3cs3DkP7H5vZdZTO-aje7ghcm/view"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      watch the demo on Google Drive
+    </a>{' '}
+    instead.
+  </video>
+  <figcaption>
+    Analyzing <code>Widget__c.Color__c</code>: pick an object, select fields, hit
+    <em> Analyze</em> — and get one table of every reference, each row tagged by its source
+    (<code>DEPENDENCY_API</code> / <code>FLEXIPAGE</code> / <code>REPORT</code>).
+  </figcaption>
+</figure>
+
+## Why this isn't a one-liner
+
+The interesting part is that **there is no single API that answers this question.** I found
+that out by reading the documentation before writing code:
+
+- Salesforce's [`MetadataComponentDependency`](https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/tooling_api_objects_metadatacomponentdependency.htm)
+  (Tooling API) is the closest thing — but it's **Beta**, it **explicitly excludes Reports**,
+  and its coverage of Lightning pages is unconfirmed.
+- **Reports** can't be reached through the dependency API at all — they need a separate path.
+- **FlexiPages** may or may not appear reliably in the dependency API, so trusting it blindly
+  would silently miss references.
+
+So every serious tool in this space (Happy Soup, Salto) uses a **hybrid**: the dependency API
+as the primary signal, plus direct metadata parsing to cover the gaps. I built the same thing —
+and made a rule of it: **every result is tagged with its `source`**, so provenance is always
+visible, never hidden. If a hit came from a Beta API, you can see that.
+
+## What I built
+
+A Lightning Web Component wired to a small, single-responsibility Apex service layer:
+
+- **`WhereUsedController`** — the thin entry point the LWC calls.
+- **`MetadataDependencyService`** — orchestrates three scanners, then merges and dedupes.
+- **`ToolingApiClient`** — the dependency-API path (Apex can't query Tooling objects directly,
+  so this is an authenticated HTTP callout).
+- **`FlexiPageUsageScanner`** — parses each Lightning page's metadata for field references.
+- **`ReportUsageScanner`** — covers the path the dependency API can't: report columns,
+  groupings, and filters.
+
+Object and field lists come from `Schema` describe calls — fast, no callouts.
+
+## How the connection works
+
+Apex can't query Tooling API objects with SOQL directly, so every metadata lookup is an HTTP
+callout — authenticated by a
+[Named Credential](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_callouts_named_credentials.htm)
+pointing back at the org itself, authorized by a modern **External Client App** using the
+[OAuth Client Credentials flow](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_client_credentials_flow.htm&type=5)
+(the right approach now that Connected App creation is restricted).
+
+Three calls do the work — and every row that comes back is tagged with the source it came from:
+
+```text
+callout:WhereUsed_Self → /tooling/query/?q=SELECT … FROM MetadataComponentDependency …
+                         Apex, validation rules, layouts…          (source: DEPENDENCY_API)
+
+callout:WhereUsed_Self → /tooling/sobjects/FlexiPage/{id}   (retrieve one page's Metadata)
+                         Lightning-page field references            (source: FLEXIPAGE)
+
+callout:WhereUsed_Self → /analytics/reports/{id}/describe
+                         report columns, filters, groupings         (source: REPORT)
+```
+
+(FlexiPages are fetched one at a time on purpose — the Tooling API won't return the `Metadata`
+field for more than one row per query.)
+
+Want to run it in your own org? The repo has step-by-step **deploy, test, and Named-Credential
+setup** docs — I keep the reproducible steps next to the code, where they stay current, rather
+than reprinting a guide here that would drift out of date.
+
+## The detail that makes it trustworthy
+
+Directly parsing shared field names is a trap. Search for the standard `Name` field and a
+naïve tool will "find" it on every unrelated object that also happens to have a `Name` column.
+Two safeguards prevent that:
+
+- **Object-qualified matching** — a report or page reference only counts if its object actually
+  matches the one you're analyzing.
+- **Self-describing resolution, no hardcoded aliases** — the report engine stores standard
+  fields as opaque codes (the `Name` field shows up as `CUST_NAME`). Rather than maintain a
+  brittle lookup table, the scanner reads the mapping Salesforce already provides in the
+  report describe payload — so any standard *or* custom field resolves correctly on any object.
+
+## Built to be verified
+
+- **58 Apex tests**, every callout mocked — the suite passes with no live org setup. Org-wide
+  coverage 85%, with the core classes well above that.
+- Validated **live**, end to end, across all three sources: analyzing a seeded custom field
+  returns dependency-API, FlexiPage, and Report hits together — with the cross-object false
+  positives provably eliminated.
+- The **known limitations are written down, not hidden** — the Beta status of the dependency
+  API, the 2,000-row query cap, the fact that dynamic references (dynamic SOQL, reflection) are undetectable by *any*
+  metadata approach.
+
+## Why it's in the portfolio
+
+This is the clearest example of how I approach an architecture problem: research the platform's
+real constraints first, choose a design that survives them, and make the result honest about
+what it knows and how it knows it. The full reasoning — fourteen documentation-backed findings
+behind every decision — lives in the repo's [`BLUEPRINT.md`](https://github.com/lokeshverma01/where-is-this-used/blob/master/docs/BLUEPRINT.md).
