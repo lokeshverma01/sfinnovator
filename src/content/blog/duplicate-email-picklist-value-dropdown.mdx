@@ -1,0 +1,117 @@
+---
+type: debugging
+title: 'Why a picklist shows a duplicate value in the dropdown — bug or expected behavior?'
+description: 'A picklist dropdown showed the same value twice — but only on some records. The debugging trail, and why it turns out to be expected Salesforce behavior.'
+publishedAt: 2026-09-25
+difficulty: Intermediate
+tags: [Picklists, Case Origin, Salesforce Admin, Debugging]
+status: solved
+symptom: 'The Case Origin picklist shows the value "Email" twice in the dropdown — but only on some records, not all.'
+environment: 'Standard Case Origin picklist where a value labeled "Email" was deactivated and a new "Email" value was later created.'
+rootCause: 'Two picklist values share the same label "Email" but have different API names — the deactivated original (API name "Email") and its active replacement (API name "Email2"). Salesforce keeps an inactive value on records that already hold it and appends it to the dropdown while editing, so those records display both.'
+resolution: 'Not a bug — this is expected behavior. Deactivated picklist values are retained on existing records and shown alongside the active set when you edit those records, so the same label can visibly repeat.'
+image: '/images/case-origin-duplicate-email-picklist-dropdown.png'
+published: true
+---
+
+Today I was enjoying my coffee when a Salesforce bug ticket landed: the picklist value
+**"Email"** on the Case Origin picklist in Lightning was showing an inconsistent, duplicate
+value in the dropdown.
+
+Initially it was not digestible to me — in general, picklist values and labels are unique by
+default. So a "duplicate" value should not even be possible.
+
+## What the report actually said
+
+The behavior was described as *inconsistent*: on some records the dropdown showed only one
+**Email** option, but on other records the dropdown showed **two "Email"** options.
+
+<figure>
+  <img
+    src="/images/case-origin-duplicate-email-picklist-dropdown.png"
+    alt="Case Origin picklist dropdown in Lightning showing two Email options — one highlighted as a suspected duplicate and one already selected with a checkmark"
+  />
+  <figcaption>
+    The reported issue: the Case Origin dropdown shows <code>Email</code> twice — one in the
+    list, and one already selected (with the checkmark) at the bottom.
+  </figcaption>
+</figure>
+
+At first it really seemed like a bug, because **inactive picklist values do not show up in the
+dropdown** in Salesforce.
+
+## Straight to the picklist
+
+I went straight to the picklist and verified it. I saw that an **inactive** picklist value was
+also present in the picklist value set, with the label **"Email"** — sitting right below the
+active values.
+
+<figure>
+  <img
+    src="/images/case-origin-picklist-values-setup.png"
+    alt="Setup page for Case Origin picklist values: active values Phone, Web, Email (API name Email2) and Email3, plus an Inactive Values section containing Email with API name Email"
+  />
+  <figcaption>
+    In Setup: the active value labeled <code>Email</code> has the API name <code>Email2</code>,
+    while the <strong>inactive</strong> value labeled <code>Email</code> keeps the original API
+    name <code>Email</code>. Same label, different API name.
+  </figcaption>
+</figure>
+
+## The clue: compare the API names
+
+On further debugging, I compared the API names behind these two records. That is where the
+mystery resolved:
+
+- On records where the duplicate appeared, the **currently selected** value's API name matched
+  the **inactive** value's API name (`Email`).
+- On records where only one "Email" showed up, the selected value was either not "Email" at all,
+  or its API name matched the **new, active** value (`Email2`).
+
+So the two dropdown entries were never really the same value — they only *look* identical
+because they share the label "Email." One is the active `Email2`; the other is the retained,
+inactive `Email` that the record was already holding.
+
+## Why this is actually expected behavior
+
+Once the API names lined up, it was clear this is **expected behavior**, not a bug. Here is what
+is really happening.
+
+When you deactivate a picklist value in Salesforce, the inactive value remains stored on all
+existing historical records that already use it. Behind the scenes, active vs. inactive is just
+the [`isActive`](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_customvalue.htm)
+flag on the value, and each value keeps its own API name (`fullName`) — which is exactly why the
+old `Email` and the new `Email2` can coexist under the same label.
+
+**What happens to existing records:**
+
+- **Data retention** — the field value does not disappear or get wiped out on records where it
+  was already saved.
+- When you open an existing record that contains the deactivated value, you will still see that
+  value displayed on the record detail page or layout.
+- If you edit an existing record that has the inactive value, you can keep it as-is without being
+  forced to change it. However, if you open the picklist dropdown during that edit, the
+  deactivated value will **not** appear as a fresh option to select — it is only shown because
+  the record is already holding it. If you change the field to a different value, you cannot
+  select the old inactive value again.
+
+**General impacts of deactivation:**
+
+- **New records** — the inactive value is completely hidden and cannot be chosen when creating
+  new records.
+- **Reports and list views** — the value remains visible in existing reports and data for the
+  records that hold it, but it may be unavailable or removed from specific filter criteria or
+  report bucket options.
+
+That combination is exactly what produced the "duplicate": on a record already holding the
+inactive `Email`, Salesforce shows the active set (`Phone`, `Web`, `Email` = `Email2`, `Email3`)
+**and** appends the record's own retained value (`Email` = `Email`) so you do not lose it — so
+you see "Email" twice. On any record holding a different value, there is nothing to append, so
+you see "Email" only once.
+
+## The takeaway
+
+Two picklist values can share a label but never an API name. When a dropdown looks like it has a
+duplicate, **compare the API names first** — the label is for humans, the API name is the truth.
+
+And that is how I resolved this one, finished my coffee, and moved on to a short break.
