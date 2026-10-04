@@ -1,0 +1,332 @@
+---
+type: debugging
+title: 'Salesforce refresh token keeps expiring? Refresh Token Rotation explained'
+description: 'A third-party integration kept asking for a new refresh token. The cause: Refresh Token Rotation, now enforced on new Salesforce apps — and how to handle it.'
+publishedAt: 2026-10-04
+difficulty: Intermediate
+tags: [OAuth, External Client Apps, Refresh Token, Integration, Security]
+status: solved
+symptom: 'A third-party integration works at first, then fails with "invalid_grant: expired access/refresh token" — so the team has to redo the authorization flow and hand over a new refresh token again and again.'
+environment: 'External Client App created on or after July 9, 2026, using the Web Server (Authorization Code + PKCE) flow, with a third-party client that reuses one refresh token.'
+rootCause: 'Refresh Token Rotation is enabled — and locked on for apps created on or after July 9, 2026. Every refresh returns a new refresh token and invalidates the one just used, so a client that keeps reusing the original token fails on its second refresh.'
+resolution: 'Make the client store the new refresh token from every refresh response and serialize refresh calls. If the integration genuinely cannot support rotation, contact Salesforce Support to get it disabled for that app.'
+published: true
+---
+
+A developer from my team came to me with a frustrating one. A third-party integration kept
+asking for a refresh token again and again, saying it was getting expired. Every time, they
+had to go through the whole authorization process again and hand a fresh refresh token to the
+third party — only for it to "expire" again shortly after.
+
+The app's policy said **"Expire refresh token if not used for 30 days"**, and the integration
+was using it every day. So why was it dying?
+
+## First, rule out the flow
+
+The first thing I check with any refresh-token complaint is the OAuth flow, because not every
+flow gives you a refresh token at all.
+
+| Flow | Refresh token? | Notes |
+| --- | --- | --- |
+| Web Server (Authorization Code), with PKCE | ✅ Yes | Needs the `refresh_token` scope. Best fit for server-side integrations. |
+| Device Flow | ✅ Yes | For input-limited devices and CLIs. |
+| Authorization Code and Credentials (Headless) | ✅ Yes | Headless identity scenarios. |
+| User-Agent | ⚠️ Conditional | Depends on the redirect URI. |
+| Client Credentials | ❌ No | Just request a new access token. |
+| JWT Bearer | ❌ No | Sign a new assertion and request again. |
+
+Client Credentials never returns a refresh token — that is by design in the OAuth 2.0 spec
+([RFC 6749 §4.4.3](https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.3)). The app always
+holds its own credentials, so it can simply ask for a new access token whenever it needs one.
+
+In our case the integration was on the **Web Server flow**, and it *was* getting a refresh
+token. So the flow was fine. The problem was what happened **after** the first refresh.
+
+## Reproducing it
+
+I set up an External Client App in a test org with the same configuration and ran the flow end
+to end. Here is what happened:
+
+| Call | Refresh token sent | Result |
+| --- | --- | --- |
+| Code exchange | — | ✅ Issued refresh token **A** |
+| Refresh #1 | **A** | ✅ New access token **and a new refresh token B** |
+| Refresh #2 | **A** (reused) | ❌ `invalid_grant: expired access/refresh token` |
+
+That was the exact symptom the third party was seeing. The token was not expiring on time — it
+was being **replaced** on every use, and the integration kept presenting the old one.
+
+## Root cause: Refresh Token Rotation
+
+The app had **Refresh Token Rotation** enabled. With rotation on, every
+`grant_type=refresh_token` call:
+
+1. Returns a new access token **and a new refresh token**.
+2. **Invalidates the refresh token that was just used.**
+
+So each refresh token works **only once**. The third party expected "one refresh token, unlimited
+access tokens until it expires" — which is only true when rotation is **off**.
+
+The 30-day setting is a different control. It is an **idle timeout**: a refresh token is revoked
+if it isn't used for 30 days, and each use resets the clock. It is a maximum, not a guarantee
+that the same token stays reusable.
+
+Rotation is a recommended OAuth security practice: if a refresh token ever leaks, it can be used
+only once and then becomes useless. The OAuth 2.0 Security Best Current Practice requires either
+rotation or sender-constrained refresh tokens for public clients
+([RFC 9700 §2.2.2](https://datatracker.ietf.org/doc/html/rfc9700#section-2.2.2)).
+
+## What changed — and when
+
+This is where it got interesting. When I tried to turn rotation off in my test app, the
+**Enable Refresh Token Rotation** checkbox was greyed out with the message:
+
+> *"To change this required setting, contact Support."*
+
+I also tried a metadata deploy with `isRefreshTokenRotationEnabled` set to `false` (the field on
+[`ExtlClntAppGlobalOauthSettings`](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_extlclntappglobaloauthsettings.htm)).
+The deploy reported **Succeeded** — but retrieving the metadata again showed the value still
+`true`. The platform silently overrides it.
+
+That is because of Salesforce's **secure-by-default** change. For locally created **Connected
+Apps and External Client Apps created on or after July 9, 2026**, three OAuth security controls
+are **required and can't be disabled by admins**:
+
+1. **Require PKCE** for supported authorization flows.
+2. **Enable Refresh Token Rotation.**
+3. **Limit the idle refresh token lifetime to 30 days.**
+
+This is part of a wider Salesforce push to make these controls mandatory. AppExchange partners
+had to enable PKCE, Refresh Token Rotation, and the 30-day idle limit by **May 11, 2026**
+([Secure Your Connected Apps and External Client Apps](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/secure_code_ac_eca.htm)),
+and Salesforce began technical enforcement on **June 30, 2026**
+([Connected Apps & ECA Security Controls Post-Enforcement Guidance](https://help.salesforce.com/s/articleView?id=005388177&language=en_US&type=1)).
+
+<figure>
+  <img
+    src="/images/eca-security-locked-pkce-refresh-token-rotation.png"
+    alt="External Client App Security settings with Require PKCE, Enable Refresh Token Rotation and Limit Idle Refresh Token TTL to 30 Days checked and locked, each marked To change this required setting, contact Support"
+  />
+  <figcaption>
+    The Security section of a new External Client App: PKCE, Refresh Token Rotation and the 30-day idle limit are checked, greyed out, and marked <em>“To change this required setting, contact Support.”</em>
+  </figcaption>
+</figure>
+
+| | Apps created before July 9, 2026 | Apps created on or after July 9, 2026 |
+| --- | --- | --- |
+| PKCE | Optional, admin-controlled | **Required, locked** |
+| Refresh Token Rotation | Optional, admin-controlled | **Enabled, locked** |
+| Refresh token idle limit | Admin-chosen (could be "valid until revoked") | **30 days maximum** |
+| Reusing one refresh token | Works, if rotation is off | **Fails after the first refresh** |
+
+Our app was created after that date, so all three were enforced. Any team that builds a new app
+for an existing integration — or recreates one — will now run into this, even if the
+"same" integration worked fine against an older app for years.
+
+## The implementation steps I followed
+
+Here is the full Web Server flow with PKCE, set up to work with rotation, PKCE, and the 30-day
+idle limit enforced.
+
+### 1. Create and configure the External Client App
+
+1. **Setup → Quick Find → External Client App Manager → New External Client App.**
+2. **Basic Information:** app name, API name, contact email. Distribution State: **Local**.
+3. **Enable OAuth**, then set:
+   - **Callback URL** — your redirect URI, for example `https://sfinnovator.com/`. It must
+     match `redirect_uri` **exactly**, including the trailing `/`.
+   - **OAuth Scopes** — *Manage user data via APIs (`api`)* and *Perform requests at any time
+     (`refresh_token`, `offline_access`)*.
+
+<figure>
+  <img
+    src="/images/eca-oauth-callback-url-scopes.png"
+    alt="External Client App OAuth settings with Callback URL https://sfinnovator.com/ and selected scopes Manage user data via APIs (api) and Perform requests at any time (refresh_token, offline_access)"
+  />
+  <figcaption>
+    OAuth settings: the callback URL (with its trailing <code>/</code>) and the two scopes needed for a refresh token.
+  </figcaption>
+</figure>
+
+4. **Security** (locked on for new apps): Require secret for Web Server Flow, Require secret for
+   Refresh Token Flow, Require PKCE, Enable Refresh Token Rotation, and Limit Idle Refresh Token
+   TTL to 30 Days.
+5. **Create**, then wait a few minutes for the app to propagate.
+6. **Policies tab → Edit:** set **Permitted Users** (pre-authorize the integration user's profile
+   or permission set), confirm the **Refresh Token Policy** (30 days idle), set IP relaxation as
+   needed, and **Save**.
+
+<figure>
+  <img
+    src="/images/eca-permitted-profiles.png"
+    alt="External Client App policies with the System Administrator profile selected under Select Profiles"
+  />
+  <figcaption>
+    Permitted users: pre-authorize the integration user’s profile (or a permission set).
+  </figcaption>
+</figure>
+
+<figure>
+  <img
+    src="/images/eca-refresh-token-policy-30-days.png"
+    alt="App Authorization policy set to Expire refresh token if not used for specific time, with a validity period of 30 Days and Idle Expiration Time Limit Enforced"
+  />
+  <figcaption>
+    Refresh Token Policy: <em>Expire refresh token if not used for specific time</em>, 30 days — labelled <em>Idle Expiration Time Limit Enforced</em> on new apps.
+  </figcaption>
+</figure>
+
+7. **Settings tab → OAuth Settings → Consumer Key and Secret:** copy both and store them in a
+   vault. Never put them in URLs, chat, or tickets.
+
+Good to know: the rotation checkbox lives on the **Settings** tab (OAuth Settings → Security),
+**not** the Policies tab. The 30-day idle limit appears in both places: it's locked on under
+Security, and the actual Refresh Token Policy is on the Policies tab.
+
+### 2. Generate a PKCE pair
+
+Generate a new pair for every authorization:
+
+```bash
+VERIFIER=$(openssl rand -base64 64 | tr -d '\n=' | tr '+/' '-_' | cut -c1-64)
+CHALLENGE=$(printf '%s' "$VERIFIER" | openssl dgst -sha256 -binary | openssl base64 | tr -d '\n=' | tr '+/' '-_')
+```
+
+The verifier must be 43–128 URL-safe characters, and the challenge is
+`BASE64URL(SHA256(verifier))` with method `S256`
+([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636)).
+
+### 3. Authorization request (in the browser)
+
+```text
+https://<MY_DOMAIN>/services/oauth2/authorize
+  ?response_type=code
+  &client_id=<CONSUMER_KEY>
+  &redirect_uri=https%3A%2F%2Fsfinnovator.com%2F
+  &scope=api%20refresh_token
+  &code_challenge=<CHALLENGE>
+  &code_challenge_method=S256
+```
+
+After login and approval, Salesforce redirects to your callback — for example
+`https://sfinnovator.com/?code=...`. **URL-decode**
+the code (`%3D` → `=`). It is single-use and valid for about 15 minutes.
+
+### 4. Exchange the code for tokens
+
+```bash
+curl -X POST https://<MY_DOMAIN>/services/oauth2/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=authorization_code" \
+  --data-urlencode "code=<AUTH_CODE>" \
+  -d "client_id=<CONSUMER_KEY>" \
+  -d "client_secret=$SF_CLIENT_SECRET" \
+  -d "redirect_uri=https://sfinnovator.com/" \
+  -d "code_verifier=$VERIFIER"
+```
+
+The response includes `access_token`, `refresh_token`, `instance_url`, and `id`. Store the
+refresh token securely.
+
+### 5. Call the API with the access token
+
+```bash
+curl https://<INSTANCE_URL>/services/data/v65.0/sobjects/Account/describe \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+### 6. Refresh the access token
+
+```bash
+curl -X POST https://<MY_DOMAIN>/services/oauth2/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=refresh_token" \
+  --data-urlencode "refresh_token=<CURRENT_REFRESH_TOKEN>" \
+  -d "client_id=<CONSUMER_KEY>" \
+  -d "client_secret=$SF_CLIENT_SECRET"
+```
+
+With rotation on, this response contains a **new** `refresh_token`. Everything depends on what
+the client does with it.
+
+### 7. Handle rotation in the client (the actual fix)
+
+This is what the third party had to change:
+
+1. **Save the new refresh token from every refresh response** and discard the old one — before
+   using the new access token.
+2. **Serialize refresh calls.** If several workers or nodes share one token, only one may
+   refresh at a time. Otherwise one wins, and the rest get `invalid_grant`.
+3. **Use the access token until it expires** (a `401 INVALID_SESSION_ID`), then refresh — avoid
+   unnecessary refreshes.
+4. **Refresh at least once every 30 days**, or the idle limit revokes the token.
+5. **On `invalid_grant`, stop retrying** with the same token. Alert, and trigger a new
+   authorization.
+
+```text
+function getAccessToken():
+    if cachedAccessToken is valid: return cachedAccessToken
+    acquire lock("sf_refresh")
+        if cachedAccessToken is valid: return cachedAccessToken   # another worker already refreshed
+        rt = store.read("refresh_token")                          # always read the latest
+        resp = POST /services/oauth2/token
+                 grant_type=refresh_token, refresh_token=rt, client_id, client_secret
+        if resp.error == "invalid_grant":
+            alert("re-authorization required"); raise
+        if resp.refresh_token:
+            store.write("refresh_token", resp.refresh_token)      # rotate
+        cachedAccessToken = resp.access_token
+    release lock
+    return cachedAccessToken
+```
+
+### 8. Verify the behavior
+
+| Test | Rotation ON | Rotation OFF |
+| --- | --- | --- |
+| Refresh with token A | ✅ New access token + new token B | ✅ New access token |
+| Refresh again with token A | ❌ `invalid_grant` | ✅ Works |
+| Refresh with token B | ✅ New access token + token C | — |
+
+To monitor or revoke tokens, use **Setup → Connected Apps OAuth Usage**, and check the
+integration user's **Login History** for failed refreshes.
+
+## Other things that can kill a refresh token
+
+If rotation is handled and tokens still die, check these too:
+
+- **Too many approvals** — each app allows
+  [five unique approvals per user](https://help.salesforce.com/s/articleView?id=000205444&language=en_US&type=1).
+  Once that limit is reached, a new approval — from another environment or instance — revokes
+  the oldest one.
+- **Revocations** — a password reset, a frozen or deactivated user, an admin revoking access, or
+  a policy change to "Immediately expire refresh token".
+- **Concurrent refreshes** — two threads using the same token under rotation.
+
+## If your integration can't support rotation
+
+The right long-term fix is to make the client handle rotation — it is more secure, and it
+works the same on every new app. If the third-party product genuinely cannot store a rotated
+token, **[contact Salesforce Support](https://help.salesforce.com/s/articleView?id=005167035&language=en_US&type=1) to get Refresh Token
+Rotation disabled** for that app.
+
+## Quick troubleshooting reference
+
+| Error | Likely cause | Fix |
+| --- | --- | --- |
+| No `refresh_token` in the response | Client Credentials or JWT flow, or missing `refresh_token` scope | Use the Web Server flow; add the scope to the app and the request |
+| `invalid_grant: expired access/refresh token` | Reused token under rotation, 30 days idle, revoked, or approval limit | Use the latest refresh token; re-authorize |
+| `invalid_grant: authentication failure` | Wrong secret, or the code was already used or expired | Get a new code; check the secret |
+| `invalid_request: missing required code challenge` | PKCE required but not sent | Add the PKCE parameters |
+| `invalid_grant: invalid code verifier` | Verifier doesn't match the challenge | Use the matching pair |
+| `redirect_uri_mismatch` | `redirect_uri` differs from the callback URL | Match it exactly |
+| UI says *"To change this required setting, contact Support"* | Control is locked for apps created on or after July 9, 2026 | Contact Salesforce Support |
+
+## The takeaway
+
+When a refresh token "keeps expiring", don't start with the expiry policy. **Refresh once, then
+try the old token again.** If it fails, it's rotation — and the fix belongs in the client, not in
+the token.
+
+For my teammate, that meant no more regenerating tokens by hand. The fix belonged in the third
+party's client: keep the newest refresh token every time.
